@@ -3,6 +3,7 @@
 const Pegawai = use('App/Models/MitraPegawai')
 const PegawaiToken = use('App/Models/TokenPegawai')
 const Mail = use('Mail')
+const MailChecker = require('./../../../../node_modules/mailchecker')
 
 class PegawaiController {
     async register({ request, auth, response }) {
@@ -28,6 +29,12 @@ class PegawaiController {
             if (emailExists) {
                 return response.staus(400).send({
                     message: 'Email sudah digunakan'
+                })
+            }
+
+            if (!MailChecker.isValid(data.pegawai_email)) {
+                return response.status(400).send({
+                    message: 'Email tidak valid'
                 })
             }
 
@@ -158,6 +165,15 @@ class PegawaiController {
                 error: error.name,
                 message: error.message
             })
+        }
+    }
+
+    async viewChangePassword({ params, view, response }) {
+        const thisToken = await PegawaiToken.findBy('token', params.token)
+        if(thisToken){
+            return view.render('change-password')
+        }else{
+            return view.render('404')
         }
     }
 }

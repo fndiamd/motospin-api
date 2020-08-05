@@ -9,6 +9,38 @@ class MitraOutlet extends Model {
         return 'id_mitra'
     }
 
+    pegawai(){
+        return this.hasMany('App/Models/MitraPegawai')
+    }
+
+    jenisMitra(){
+        return this.belongsTo('App/Models/JenisMitra')
+    }
+
+    owner(){
+        return this.belongsTo('App/Models/MitraOwner')
+    }
+
+    kategoriProduk(){
+        return this.hasMany('App/Models/KategoriProduk')
+    }
+
+    merkProduk(){
+        return this.hasMany('App/Models/MerkProduk')
+    }
+
+    produk(){
+        return this.hasMany('App/Models/Produk')
+    }
+
+    orderSparepart(){
+        return this.hasMany('App/Models/OrderSparepart')
+    }
+
+    orderService(){
+        return this.hasMany('App/Models/OrderService')
+    }
+
 }
 
 module.exports = MitraOutlet

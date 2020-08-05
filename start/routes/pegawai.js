@@ -12,5 +12,6 @@ Route.group(() => {
     Route.post('/pegawai-register', 'Auth/PegawaiController.register')
     Route.post('/pegawai-login', 'Auth/PegawaiController.login')
     Route.post('/pegawai-request-password', 'Auth/PegawaiController.forgotPassword')
+    Route.get('/pegawai-reset-password/:token', 'Auth/PegawaiController.viewChangePassword')
     Route.post('/pegawai-reset-password/:token', 'Auth/PegawaiController.changePassword')
 }).prefix('api/v1/auth').middleware(['guest'])

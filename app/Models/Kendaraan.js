@@ -9,6 +9,10 @@ class Kendaraan extends Model {
         return 'kendaraan_nopol'
     }
 
+    user(){
+        return this.belongsTo('App/Models/User')
+    }
+
 }
 
 module.exports = Kendaraan

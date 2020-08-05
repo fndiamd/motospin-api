@@ -13,5 +13,6 @@ Route.group(() => {
     Route.post('/user-register', 'Auth/UserController.register')
     Route.post('/user-login', 'Auth/UserController.login')
     Route.post('/user-request-password', 'Auth/UserController.forgotPassword')
+    Route.get('/user-reset-password/:token', 'Auth/UserController.viewChangePassword')
     Route.post('/user-reset-password/:token', 'Auth/UserController.changePassword')
 }).prefix('api/v1/auth').middleware(['guest'])

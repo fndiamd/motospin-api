@@ -33,6 +33,10 @@ class MitraOwner extends Model {
     kodeOwner() {
         return this.hasMany('App/Models/KodeOwner')
     }
+
+    outlet(){
+        return this.hasMany('App/Models/MitraOutlet')
+    }
 }
 
 module.exports = MitraOwner

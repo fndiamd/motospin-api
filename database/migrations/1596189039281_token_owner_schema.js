@@ -4,10 +4,14 @@
 const Schema = use('Schema')
 
 class TokenOwnerSchema extends Schema {
-  up () {
+  up() {
     this.create('token_owners', (table) => {
       table.increments()
-      table.integer('owner_id').unsigned().references('id_owner').inTable('mitra_owners')
+      table.integer('owner_id')
+        .unsigned()
+        .references('id_owner')
+        .inTable('mitra_owners')
+        .onDelete('CASCADE')
       table.string('token', 255).notNullable().unique().index()
       table.string('type', 80).notNullable()
       table.boolean('is_revoked').defaultTo(false)
@@ -15,7 +19,7 @@ class TokenOwnerSchema extends Schema {
     })
   }
 
-  down () {
+  down() {
     this.drop('token_owners')
   }
 }

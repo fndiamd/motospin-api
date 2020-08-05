@@ -7,6 +7,7 @@ const Route = use('Route')
 require('./routes/user')
 require('./routes/owner')
 require('./routes/pegawai')
+require('./routes/mitra_outlet')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

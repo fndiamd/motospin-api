@@ -8,11 +8,11 @@ const Hash = use('Hash')
 
 class User extends Model {
 
-  static get primaryKey(){
+  static get primaryKey() {
     return 'id_user'
   }
 
-  static boot () {
+  static boot() {
     super.boot()
 
     /**
@@ -36,12 +36,32 @@ class User extends Model {
    *
    * @return {Object}
    */
-  tokens () {
+  tokens() {
     return this.hasMany('App/Models/Token')
   }
 
-  kodeUser () {
+  kodeUser() {
     return this.hasMany('App/Models/KodeUser')
+  }
+
+  kendaraan() {
+    return this.hasMany('App/Models/Kendaraan')
+  }
+
+  cart(){
+    return this.hasMany('App/Models/KeranjangBelanja')
+  }
+
+  orderService(){
+    return this.hasMany('App/Models/OrderService')
+  }
+
+  orderSparepart(){
+    return this.hasMany('App/Models/OrderSparepart')
+  }
+
+  sewaRental(){
+    return this.hasMany('App/Models/SewaRental')
   }
 }
 

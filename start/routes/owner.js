@@ -12,5 +12,6 @@ Route.group(() => {
     Route.post('/owner-register', 'Auth/OwnerController.register')
     Route.post('/owner-login', 'Auth/OwnerController.login')
     Route.post('/owner-request-password', 'Auth/OwnerController.forgotPassword')
+    Route.get('/owner-reset-password/:token', 'Auth/OwnerController.viewChangePassword')
     Route.post('/owner-reset-password/:token', 'Auth/OwnerController.changePassword')
 }).prefix('api/v1/auth').middleware(['guest'])

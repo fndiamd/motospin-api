@@ -4,10 +4,14 @@
 const Schema = use('Schema')
 
 class TokenPegawaiSchema extends Schema {
-  up () {
+  up() {
     this.create('token_pegawais', (table) => {
       table.increments()
-      table.integer('pegawai_id').unsigned().references('id_pegawai').inTable('mitra_pegawais')
+      table.integer('pegawai_id')
+        .unsigned()
+        .references('id_pegawai')
+        .inTable('mitra_pegawais')
+        .onDelete('CASCADE')
       table.string('token', 255).notNullable().unique().index()
       table.string('type', 80).notNullable()
       table.boolean('is_revoked').defaultTo(false)
@@ -15,7 +19,7 @@ class TokenPegawaiSchema extends Schema {
     })
   }
 
-  down () {
+  down() {
     this.drop('token_pegawais')
   }
 }

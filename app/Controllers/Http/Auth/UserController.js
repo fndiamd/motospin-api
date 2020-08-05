@@ -4,6 +4,7 @@ const User = use('App/Models/User')
 const UserToken = use('App/Models/Token')
 const KodeUser = use('App/Models/KodeUser')
 const Mail = use('Mail')
+const MailChecker = require('./../../../../node_modules/mailchecker')
 
 class UserController {
 
@@ -29,6 +30,12 @@ class UserController {
             if (emailExists) {
                 return response.status(400).send({
                     message: 'Email sudah digunakan'
+                })
+            }
+
+            if (!MailChecker.isValid(data.user_email)) {
+                return response.status(400).send({
+                    message: 'Email tidak valid'
                 })
             }
             // insert into user
@@ -173,6 +180,9 @@ class UserController {
     async forgotPassword({ auth, request, response }) {
         try {
             const thisUser = await User.findBy('user_email', request.input('user_email'))
+            if (!thisUser) {
+                return response.json({ message: 'Email tidak terdaftar' })
+            }
             const thisToken = await auth.authenticator('user').generate(thisUser)
 
             await UserToken.create({
@@ -208,21 +218,21 @@ class UserController {
             const thisToken = await UserToken.query().where('token', params.token).first()
             let id_user = thisToken.user_id
             const thisUser = await User.findBy('id_user', id_user)
-            
+
             const data = {
                 new_password: request.input('new_password'),
                 confirm_password: request.input('confirm_password')
             }
 
-            if(data.new_password === data.confirm_password){
+            if (data.new_password === data.confirm_password) {
                 thisToken.is_revoked = true
                 thisUser.user_password = data.new_password
                 await thisUser.save()
                 await thisToken.save()
 
-                return response.status(200).send({status: true})
-            }else{
-                return response.status(400).send({message: "password tidak sama"})
+                return response.status(200).send({ status: true })
+            } else {
+                return response.status(400).send({ message: "password tidak sama" })
             }
 
         } catch (error) {
@@ -234,6 +244,14 @@ class UserController {
         }
     }
 
+    async viewChangePassword({ params, view, response }) {
+        const thisToken = await UserToken.findBy('token', params.token)
+        if(thisToken){
+            return view.render('change-password')
+        }else{
+            return view.render('404')
+        }
+    }
 }
 
 module.exports = UserController

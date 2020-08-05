@@ -29,6 +29,10 @@ class MitraPegawai extends Model {
         return this.hasMany('App/Models/TokenPegawai', 'id_pegawai', 'pegawai_id')
     }
 
+    outlet(){
+        return this.belongsTo('App/Models/MitraOutlet')
+    }
+
 }
 
 module.exports = MitraPegawai

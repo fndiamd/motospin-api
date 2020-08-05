@@ -9,6 +9,10 @@ class JenisMitra extends Model {
         return 'id_jenis_mitra'
     }
 
+    outlet(){
+        return this.hasMany('App/Models/MitraOwner')
+    }
+
 }
 
 module.exports = JenisMitra

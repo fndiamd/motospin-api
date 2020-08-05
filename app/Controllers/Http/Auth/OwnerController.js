@@ -4,6 +4,7 @@ const Owner = use('App/Models/MitraOwner')
 const OwnerToken = use('App/Models/TokenOwner')
 const KodeOwner = use('App/Models/KodeOwner')
 const Mail = use('Mail')
+const MailChecker = require('./../../../../node_modules/mailchecker')
 
 class OwnerController {
 
@@ -29,6 +30,12 @@ class OwnerController {
             if (emailExists) {
                 return response.staus(400).send({
                     message: 'Email sudah digunakan'
+                })
+            }
+
+            if (!MailChecker.isValid(data.owner_email)) {
+                return response.status(400).send({
+                    message: 'Email tidak valid'
                 })
             }
 
@@ -228,6 +235,15 @@ class OwnerController {
                 error: error.name,
                 message: error.message
             })
+        }
+    }
+
+    async viewChangePassword({ params, view, response }) {
+        const thisToken = await OwnerToken.findBy('token', params.token)
+        if(thisToken){
+            return view.render('change-password')
+        }else{
+            return view.render('404')
         }
     }
 
