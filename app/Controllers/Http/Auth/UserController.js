@@ -193,7 +193,7 @@ class UserController {
             })
 
             const nama = thisUser.user_nama
-            const link = "http://localhost:3333/api/v1/auth/user-reset-password/" + thisToken.token
+            const link = "https://calibrapps-lab.site/api/v1/auth/user-reset-password/" + thisToken.token
             const sendMail = await Mail.send('forgot-password', { nama, link }, (message) => {
                 message.to(thisUser.user_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisUser.user_nama + ' Motospin')
             })
@@ -250,6 +250,50 @@ class UserController {
             return view.render('change-password')
         }else{
             return view.render('404')
+        }
+    }
+
+    async update({ auth, request, response }){
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            const thisUser = await User.findOrFail(authData.id_user)
+            const dataUpdate = {
+                user_nama: request.input('user_nama'),
+                user_email: request.input('user_email'),
+                user_telp: request.input('user_telp')
+            }
+
+            thisUser.user_nama = dataUpdate.user_nama
+            thisUser.user_email = dataUpdate.user_email
+            thisUser.user_telp = dataUpdate.user_telp
+
+            await thisUser.save()
+            return response.json(thisUser)
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.json({ message: 'User tidak ditemukan'})
+            }
+            return error.message
+        }
+    }
+
+    async updatePassword({ auth, request, response }){
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            const thisUser = await User.findOrFail(authData.id_user)
+
+            if(request.input('new_password') === request.input('confirm_password')){
+                thisUser.user_password = request.input('new_password')
+                await thisUser.save()
+                return response.json({ message: 'success'})
+            }else{
+                return response.json({ message: 'Confirm password does\'t match' })
+            }
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.json({ message: 'User tidak ditemukan'})
+            }
+            return error.message
         }
     }
 }

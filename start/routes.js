@@ -8,14 +8,12 @@ require('./routes/user')
 require('./routes/owner')
 require('./routes/pegawai')
 require('./routes/mitra_outlet')
+require('./routes/kendaraan')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }
 })
 
-Route.group(() => {
-  Route.get('/mitra-owner', 'MitraOwnerController.index')
-  Route.post('/mitra-owner', 'MitraOwnerController.store')
-}).prefix('api/v1').middleware(['auth:user'])
+Route.get('/cek', 'KendaraanController.index')
 
 

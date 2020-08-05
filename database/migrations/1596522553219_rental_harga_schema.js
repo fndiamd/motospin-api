@@ -7,9 +7,9 @@ class RentalHargaSchema extends Schema {
   up() {
     this.create('rental_hargas', (table) => {
       table.increments('id_rental_harga')
-      table.string('rental_nopol')
+      table.integer('id_rental')
         .unsigned()
-        .references('rental_nopol')
+        .references('id_rental')
         .inTable('rental_mobils')
         .onUpdate('CASCADE')
         .onDelete('CASCADE')

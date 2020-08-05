@@ -5,6 +5,8 @@ Route.group(() => {
     Route.post('/owner-logout', 'Auth/OwnerController.logout')
     Route.post('/owner-verification', 'Auth/OwnerController.verifyAccount')
     Route.post('/owner-request-code', 'Auth/OwnerController.requestCode')
+    Route.put('/owner-update', 'Auth/OwnerController.update')
+    Route.put('/owner-change-password', 'Auth/OwnerController.updatePassword')
 }).prefix('api/v1/auth').middleware(['auth:owner'])
 
 // Route Middleware Guest

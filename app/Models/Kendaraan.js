@@ -6,11 +6,11 @@ const Model = use('Model')
 class Kendaraan extends Model {
 
     static get primaryKey(){
-        return 'kendaraan_nopol'
+        return 'id_kendaraan'
     }
 
     user(){
-        return this.belongsTo('App/Models/User')
+        return this.belongsTo('App/Models/User', 'id_user', 'id_user')
     }
 
 }

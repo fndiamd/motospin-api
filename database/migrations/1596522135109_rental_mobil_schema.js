@@ -6,7 +6,8 @@ const Schema = use('Schema')
 class RentalMobilSchema extends Schema {
   up() {
     this.create('rental_mobils', (table) => {
-      table.string('rental_nopol').primary()
+      table.increments('id_rental')
+      table.string('rental_nopol').notNullable()
       table.string('kendaraan_merk', 50).notNullable()
       table.string('kendaraan_tipe', 50).notNullable()
       table.integer('kendaraan_tahun').notNullable()

@@ -116,7 +116,7 @@ class PegawaiController {
             })
 
             const nama = thisPegawai.pegawai_nama
-            const link = "http://localhost:3333/api/v1/auth/pegawai-reset-password/" + thisToken.token
+            const link = "https://calibrapps-lab.site/api/v1/auth/pegawai-reset-password/" + thisToken.token
 
             await Mail.send('forgot-password', { nama, link }, (message) => {
                 message.to(thisPegawai.pegawai_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisPegawai.pegawai_nama + ' Motospin')
@@ -174,6 +174,50 @@ class PegawaiController {
             return view.render('change-password')
         }else{
             return view.render('404')
+        }
+    }
+
+    async update({ auth, request, response }){
+        try {
+            const authData = await auth.authenticator('pegawai').getUser()
+            const thisPegawai = await Pegawai.findOrFail(authData.id_pegawai)
+            const dataUpdate = {
+                pegawai_nama: request.input('pegawai_nama'),
+                pegawai_email: request.input('pegawai_email'),
+                pegawai_telp: request.input('pegawai_telp')
+            }
+
+            thisPegawai.pegawai_nama = dataUpdate.pegawai_nama
+            thisPegawai.pegawai_email = dataUpdate.pegawai_email
+            thisPegawai.pegawai_telp = dataUpdate.pegawai_telp
+
+            await thisPegawai.save()
+            return response.json(thisPegawai)
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.json({ message: 'Pegawai tidak ditemukan!'})
+            }
+            return error.message
+        }
+    }
+
+    async updatePassword({ auth, request, response }){
+        try {
+            const authData = await auth.authenticator('pegawai').getUser()
+            const thisPegawai = await Pegawai.findOrFail(authData.id_pegawai)
+
+            if(request.input('new_password') === request.input('confirm_password')){
+                thisPegawai.pegawai_password = request.input('new_password')
+                await thisPegawai.save()
+                return response.json({ message: 'success'})
+            }else{
+                return response.json({ message: 'Confirm password does\'t match' })
+            }
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.json({ message: 'Pegawai tidak ditemukan'})
+            }
+            return error.message
         }
     }
 }

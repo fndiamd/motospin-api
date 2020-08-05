@@ -187,7 +187,7 @@ class OwnerController {
             })
 
             const nama = thisOwner.owner_nama
-            const link = "http://localhost:3333/api/v1/auth/owner-reset-password/" + thisToken.token
+            const link = "https://calibrapps-lab.site/api/v1/auth/owner-reset-password/" + thisToken.token
             const sendMail = await Mail.send('forgot-password', { nama, link }, (message) => {
                 message.to(thisOwner.owner_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisOwner.owner_nama + ' Motospin')
             })
@@ -244,6 +244,50 @@ class OwnerController {
             return view.render('change-password')
         }else{
             return view.render('404')
+        }
+    }
+
+    async update({ auth, request, response }){
+        try {
+            const authData = await auth.authenticator('owner').getUser()
+            const thisOwner = await Owner.findOrFail(authData.id_owner)
+            const dataUpdate = {
+                owner_nama: request.input('owner_nama'),
+                owner_email: request.input('owner_email'),
+                owner_telp: request.input('owner_telp')
+            }
+
+            thisOwner.owner_nama = dataUpdate.owner_nama
+            thisOwner.owner_email = dataUpdate.owner_email
+            thisOwner.owner_telp = dataUpdate.owner_telp
+
+            await thisOwner.save()
+            return response.json(thisOwner)
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.json({ message: 'Owner tidak ditemukan!'})
+            }
+            return error.message
+        }
+    }
+
+    async updatePassword({ auth, request, response }){
+        try {
+            const authData = await auth.authenticator('owner').getUser()
+            const thisOwner = await Owner.findOrFail(authData.id_owner)
+
+            if(request.input('new_password') === request.input('confirm_password')){
+                thisOwner.owner_password = request.input('new_password')
+                await thisOwner.save()
+                return response.json({ message: 'success'})
+            }else{
+                return response.json({ message: 'Confirm password does\'t match' })
+            }
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.json({ message: 'Owner tidak ditemukan'})
+            }
+            return error.message
         }
     }
 

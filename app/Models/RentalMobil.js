@@ -5,7 +5,7 @@ const Model = use('Model')
 
 class RentalMobil extends Model {
     static get primaryKey(){
-        return 'rental_nopol'
+        return 'id_rental'
     }
 
     harga(){
