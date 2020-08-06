@@ -1,28 +1,23 @@
-# Adonis API application
+# Description
+An API for Motospin application customer and partnership
 
-This is the boilerplate for creating an API server in AdonisJs, it comes pre-configured with.
-
-1. Bodyparser
-2. Authentication
-3. CORS
-4. Lucid ORM
-5. Migrations and seeds
-
-## Setup
-
-Use the adonis command to install the blueprint
-
+# Setup
+Install adonis global 
 ```bash
-adonis new yardstick --api-only
+npm install -g @adonisjs/cli
 ```
 
-or manually clone the repo and then run `npm install`.
+Clone this repository
+```bash
+git clone https://github.com/fndiamd/motospin-api
+```
 
-
-### Migrations
-
-Run the following command to run startup migrations.
-
-```js
+Use adonis command to migrate all schema
+```bash
 adonis migration:run
+```
+
+Start project using
+```bash
+adonis serve --dev
 ```
