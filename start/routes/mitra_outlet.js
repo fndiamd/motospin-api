@@ -2,8 +2,10 @@ const Route = use('Route')
 
 // Common Route
 Route.group(() => {
-    Route.get('/index/:page', 'MitraOutletController.index')
+    Route.get('/index', 'MitraOutletController.index')
     Route.get('/view/:id', 'MitraOutletController.view')
+    Route.get('/nearest', 'MitraOutletController.nearest')
+    Route.post('/search', 'MitraOutletController.search')
 }).prefix('api/v1/mitra-outlet')
 
 Route.group(() => {

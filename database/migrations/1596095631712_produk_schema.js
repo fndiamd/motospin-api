@@ -13,6 +13,7 @@ class ProdukSchema extends Schema {
       table.integer('produk_tahun_kendaraan')
       table.integer('produk_stok')
       table.integer('produk_berat')
+      table.integer('produk_harga')
       table.integer('id_merk_produk')
         .unsigned()
         .references('id_merk_produk')

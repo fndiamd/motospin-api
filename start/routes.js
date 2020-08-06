@@ -10,6 +10,8 @@ require('./routes/pegawai')
 require('./routes/mitra_outlet')
 require('./routes/kendaraan')
 require('./routes/jenis_mitra')
+require('./routes/kategori')
+require('./routes/merk')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

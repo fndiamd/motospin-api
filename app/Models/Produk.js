@@ -9,15 +9,15 @@ class Produk extends Model {
     }
 
     merk(){
-        return this.belongsTo('App/Models/MerkProduk')
+        return this.belongsTo('App/Models/MerkProduk', 'id_merk_produk', 'id_merk_produk')
     }
 
     kategori(){
-        return this.belongsTo('App/Models/KategoriProduk')
+        return this.belongsTo('App/Models/KategoriProduk', 'id_kategori_produk', 'id_kategori_produk')
     }
 
     outlet(){
-        return this.belongsTo('App/Models/MitraOutlet')
+        return this.belongsTo('App/Models/MitraOutlet', 'id_mitra', 'id_mitra')
     }
 
     cart(){
