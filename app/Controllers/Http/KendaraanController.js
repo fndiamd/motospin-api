@@ -56,7 +56,7 @@ class KendaraanController {
 
             const checkExists = await Kendaraan.query().where({ kendaraan_nopol: data.kendaraan_nopol }).first()
             if (checkExists) {
-                return response.json({ message: 'Nomor polisi kendaraan sudah terpakai' })
+                return response.status(400).send({ message: 'Nomor polisi kendaraan sudah terpakai' })
             }
 
             let exec = await Kendaraan.create(data)

@@ -9,6 +9,7 @@ require('./routes/owner')
 require('./routes/pegawai')
 require('./routes/mitra_outlet')
 require('./routes/kendaraan')
+require('./routes/jenis_mitra')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

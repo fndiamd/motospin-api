@@ -14,11 +14,11 @@ class MitraOutlet extends Model {
     }
 
     jenisMitra(){
-        return this.belongsTo('App/Models/JenisMitra')
+        return this.belongsTo('App/Models/JenisMitra', 'id_jenis_mitra', 'id_jenis_mitra')
     }
 
     owner(){
-        return this.belongsTo('App/Models/MitraOwner')
+        return this.belongsTo('App/Models/MitraOwner', 'id_owner', 'id_owner')
     }
 
     kategoriProduk(){
