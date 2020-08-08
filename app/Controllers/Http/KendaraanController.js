@@ -51,6 +51,8 @@ class KendaraanController {
                 kendaraan_merk: request.input('kendaraan_merk'),
                 kendaraan_tipe: request.input('kendaraan_tipe'),
                 kendaraan_tahun: request.input('kendaraan_tahun'),
+                kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
+                kendaraan_no_mesin: request.input('kendaraan_no_mesin'),
                 id_user: authData.id_user
             }
 
@@ -77,6 +79,8 @@ class KendaraanController {
             kendaraan_merk: request.input('kendaraan_merk'),
             kendaraan_tipe: request.input('kendaraan_tipe'),
             kendaraan_tahun: request.input('kendaraan_tahun'),
+            kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
+            kendaraan_no_mesin: request.input('kendaraan_no_mesin'),
             id_user: authData.id_user
         }
 
