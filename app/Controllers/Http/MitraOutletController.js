@@ -46,9 +46,11 @@ class MitraOutletController {
 
     async nearest({ request, response }) {
         try {
+            
             const location = request.only(['lat', 'long'])
             const result = await MitraOutlet
                 .query()
+                .where({ id_jenis_mitra: 1 })
                 .orderBy('created_at', 'desc')
                 .with('owner')
                 .with('jenisMitra')
