@@ -12,6 +12,7 @@ require('./routes/kendaraan')
 require('./routes/jenis_mitra')
 require('./routes/kategori')
 require('./routes/merk')
+require('./routes/produk')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

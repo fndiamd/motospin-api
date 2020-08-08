@@ -57,7 +57,7 @@ class MitraOutletController {
             const data = []
 
             result.toJSON().map(e => {
-                if (this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) <= 5) {
+                if (this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) <= 20) {
                     data.push({
                         id_mitra: e.id_mitra,
                         mitra_nama: e.mitra_nama,
@@ -213,6 +213,8 @@ class MitraOutletController {
         let query;
         if (keywords.id_jenis_mitra == null) {
             query = `mitra_nama LIKE '%${keywords.mitra_nama}%'`
+        } else if (keywords.mitra_nama == null) {
+            query = `id_jenis_mitra = '${keywords.mitra_nama}'`
         } else {
             query = `mitra_nama LIKE '%${keywords.mitra_nama}%' AND id_jenis_mitra = ${keywords.id_jenis_mitra}`
         }

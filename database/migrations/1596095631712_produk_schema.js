@@ -8,8 +8,8 @@ class ProdukSchema extends Schema {
     this.create('produks', (table) => {
       table.increments('id_produk')
       table.string('produk_nama', 200).notNullable()
-      table.string('produk_merk_kendaraan', 50).notNullable()
-      table.string('produk_tipe_kendaraan', 50).notNullable()
+      table.string('produk_merk_kendaraan', 50)
+      table.string('produk_tipe_kendaraan', 50)
       table.integer('produk_tahun_kendaraan')
       table.integer('produk_stok')
       table.integer('produk_berat')

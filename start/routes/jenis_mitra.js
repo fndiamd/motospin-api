@@ -6,4 +6,5 @@ Route.group(() => {
     Route.post('store', 'JenisMitraController.store')
     Route.put('update/:id', 'JenisMitraController.update')
     Route.delete('delete/:id', 'JenisMitraController.delete')
+    Route.get('/img-url/:file',  'JenisMitraController.image_path')
 }).prefix('api/v1/jenis-mitra')

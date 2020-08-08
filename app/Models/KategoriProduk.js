@@ -8,10 +8,6 @@ class KategoriProduk extends Model {
         return 'id_kategori_produk'
     }
 
-    outlet(){
-        return this.belongsTo('App/Models/MitraOutlet')
-    }
-
     produk(){
         return this.hasMany('App/Models/Produk')
     }

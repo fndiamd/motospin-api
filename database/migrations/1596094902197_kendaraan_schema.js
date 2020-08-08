@@ -11,6 +11,8 @@ class KendaraanSchema extends Schema {
       table.string('kendaraan_merk', 50).notNullable()
       table.string('kendaraan_tipe', 50).notNullable()
       table.integer('kendaraan_tahun').notNullable()
+      table.string("kendaraan_no_rangka", 20)
+      table.string("kendaraan_no_mesin", 20)
       table.integer('id_user')
         .unsigned()
         .references('id_user')

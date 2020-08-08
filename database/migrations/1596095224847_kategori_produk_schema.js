@@ -8,13 +8,8 @@ class KategoriProdukSchema extends Schema {
     this.create('kategori_produks', (table) => {
       table.increments('id_kategori_produk')
       table.string('kategori_produk', 100).notNullable()
+      table.string('kategori_img_path', 200)
       table.integer('kategori_status').defaultTo(1)
-      table.integer('id_mitra')
-        .unsigned()
-        .references('id_mitra')
-        .inTable('mitra_outlets')
-        .onUpdate('CASCADE')
-        .onDelete('CASCADE')
       table.timestamps()
     })
   }

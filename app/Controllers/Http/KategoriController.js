@@ -1,17 +1,22 @@
 'use strict'
 
 const Kategori = use('App/Models/KategoriProduk')
+const Helpers = use('Helpers')
+const Env = use('Env')
 
 class KategoriController {
 
-    async index({ params, request, response }) {
+    async index({ request, response }) {
         try {
-            const page = params.page || 1
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            let page = pagination.page || 1
+            let limit = pagination.limit || 5
+            let column = pagination.column || 'created_at'
+            let sort = pagination.sort || 'desc'
             const result = await Kategori
                 .query()
-                .where({ id_mitra: request.input('id_mitra') })
-                .orderBy('created_at', 'desc')
-                .paginate(page, 5)
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
             return response.json(result)
         } catch (error) {
             return response.status(error.status).send({
@@ -22,21 +27,14 @@ class KategoriController {
         }
     }
 
-    async view({ params, response, request }) {
+    async view({ params, response }) {
         try {
-            const thisData = await Kategori.query()
-                .where({
-                    id_mitra: request.input('id_mitra'),
-                    id_kategori_produk: params.id
-                })
-                .first()
-
-            if (!thisData) {
-                return response.status(404).send({ message: 'Data tidak ditemukan' })
-            }
-
+            const thisData = await Kategori.findOrFail(params.id)
             return response.json(thisData)
         } catch (error) {
+            if (error.name === 'ModelNotFoundException') {
+                return response.status(404).send({ message: 'Data tidak ditemukan' })
+            }
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
@@ -46,23 +44,34 @@ class KategoriController {
     }
 
     async store({ request, response }) {
+        const logoFile = request.file('logo_file', {
+            types: ['png'],
+            size: '1mb'
+        })
+
+        let nameLogo = request.input('kategori_produk') + '.png'
+
         const data = {
             kategori_produk: request.input('kategori_produk'),
             kategori_status: 1,
-            id_mitra: request.input('id_mitra')
+            kategori_img_path: `${Env.get('APP_URL')}/api/v1/kategori-produk/img-url/${nameLogo}`
         }
 
-        const checkExists = await Kategori
-            .query()
-            .where({
-                kategori_produk: request.input('kategori_produk'),
-                id_mitra: request.input('id_mitra')
-            }).first()
+        const checkExists = await Kategori.findBy('kategori_produk', data.kategori_produk)
         if (checkExists) {
             return response.status(404).send({ message: 'Kategori sudah ada!' })
         }
 
         try {
+            await logoFile.move(Helpers.publicPath('uploads/kategori'), {
+                name: nameLogo,
+                overwrite: true
+            })
+
+            if (!logoFile.moved()) {
+                return logoFile.error()
+            }
+
             const exec = await Kategori.create(data)
             return exec
         } catch (error) {
@@ -75,32 +84,48 @@ class KategoriController {
     }
 
     async update({ request, response, params }) {
-        const dataUpdate = {
-            kategori_produk: request.input('kategori_produk'),
-            kategori_status: request.input('kategori_status')
-        }
-
-        const checkExists = await Kategori
-            .query()
-            .where({
-                kategori_produk: request.input('kategori_produk'),
-                id_mitra: request.input('id_mitra')
-            }).first()
-        if (checkExists) {
-            return response.status(404).send({ message: 'Kategori sudah ada!' })
-        }
-
         try {
-            const updating = await Kategori.query()
-                .where({ id_mitra: request.input('id_mitra'), id_kategori_produk: params.id })
-                .update(dataUpdate)
+            const logoFile = request.file('logo_file', {
+                types: ['png'],
+                size: '1mb'
+            })
+            let nameLogo = request.input('kategori_produk') + '.png'
 
-            if (!updating) {
-                return response.status(404).send({ message: 'Data tidak ditemukan' })
+            const dataUpdate = {
+                kategori_produk: request.input('kategori_produk'),
+                kategori_status: request.input('kategori_status')
             }
 
-            return await Kategori.find(params.id)
+            const thisData = await Kategori.findOrFail(params.id)
+            const checkExists = await Kategori.findBy('kategori_produk', request.input('kategori_produk'))
+
+            if (checkExists && thisData.kategori_produk != request.input('kategori_produk')) {
+                return response.status(404).send({ message: 'Kategori sudah ada!' })
+            }
+
+            if (request.file('logo_file') != null) {
+                await logoFile.move(Helpers.publicPath('uploads/kategori'), {
+                    name: nameLogo,
+                    overwrite: true
+                })
+
+                if (!logoFile.moved()) {
+                    return logoFile.error()
+                }
+
+                thisData.kategori_img_path = `${Env.get('APP_URL')}/api/v1/kategori-produk/img-url/${nameLogo}`
+            }
+
+            thisData.kategori_produk = dataUpdate.kategori_produk
+            thisData.kategori_status = dataUpdate.kategori_status
+            await thisData.save()
+
+            return response.json(thisData)
         } catch (error) {
+            if (error.name === 'ModelNotFoundException') {
+                return response.status(404).send({ message: 'Data tidak ditemukan!' })
+            }
+
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
@@ -111,23 +136,23 @@ class KategoriController {
 
     async delete({ request, response, params }) {
         try {
-            const thisData = await Kategori.query()
-                .where({ id_mitra: request.input('id_mitra'), id_kategori_produk: params.id })
-                .first()
-            if (!thisData) {
+            const thisData = await Kategori.findOrFail(params.id)
+            await thisData.delete()
+            return response.json({ message: 'Kategori berhasil dihapus' })
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
-
-            const kategori = await Kategori.find(params.id)
-            await kategori.delete()
-            return response.json({ message: 'success' })
-        } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
                 message: error.message
             })
         }
+    }
+
+    async image_path({ response, params }) {
+        return response.download(Helpers.publicPath(`uploads/kategori/${params.file}`))
     }
 
 }

@@ -4,14 +4,17 @@ const Merk = use('App/Models/MerkProduk')
 
 class MerkController {
 
-    async index({ params, request, response }) {
+    async index({ request, response }) {
         try {
-            const page = params.page || 1
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            let page = pagination.page || 1
+            let limit = pagination.limit || 5
+            let column = pagination.column || 'created_at'
+            let sort = pagination.sort || 'desc'
             const result = await Merk
                 .query()
-                .where({ id_mitra: request.input('id_mitra') })
-                .orderBy('created_at', 'desc')
-                .paginate(page, 5)
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
             return response.json(result)
         } catch (error) {
             return response.status(error.status).send({
@@ -24,19 +27,12 @@ class MerkController {
 
     async view({ params, request, response }) {
         try {
-            const thisData = await Merk.query()
-                .where({
-                    id_mitra: request.input('id_mitra'),
-                    id_merk_produk: params.id
-                })
-                .first()
-
-            if (!thisData) {
-                return response.status(404).send({ message: 'Data tidak ditemukan' })
-            }
-
+            const thisData = await Merk.findOrFail(params.id)
             return response.json(thisData)
         } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
+                return response.status(404).send({ message: 'Data tidak ditemukan' })
+            }
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
@@ -49,15 +45,9 @@ class MerkController {
         const data = {
             merk_produk: request.input('merk_produk'),
             merk_status: 1,
-            id_mitra: request.input('id_mitra')
         }
 
-        const checkExists = await Merk
-            .query()
-            .where({
-                merk_produk: request.input('merk_produk'),
-                id_mitra: request.input('id_mitra')
-            }).first()
+        const checkExists = await Merk.findBy('merk_produk', data.merk_produk)
         if (checkExists) {
             return response.status(404).send({ message: 'Merk sudah ada!' })
         }
@@ -75,32 +65,28 @@ class MerkController {
     }
 
     async update({ params, request, response }) {
-        const dataUpdate = {
-            merk_produk: request.input('merk_produk'),
-            merk_status: request.input('merk_status')
-        }
-
-        const checkExists = await Merk
-            .query()
-            .where({
-                merk_produk: request.input('merk_produk'),
-                id_mitra: request.input('id_mitra')
-            }).first()
-        if (checkExists) {
-            return response.status(404).send({ message: 'Merk sudah ada!' })
-        }
-
         try {
-            const updating = await Merk.query()
-                .where({ id_mitra: request.input('id_mitra'), id_merk_produk: params.id })
-                .update(dataUpdate)
+            const dataUpdate = {
+                merk_produk: request.input('merk_produk'),
+                merk_status: request.input('merk_status')
+            }
+    
+            const thisData = await Merk.findOrFail(params.id)
+            const checkExists = await Merk.findBy('merk_produk', dataUpdate.merk_produk)
+            if (checkExists && thisData.merk_produk != dataUpdate.merk_produk) {
+                return response.status(404).send({ message: 'Merk sudah ada!' })
+            }
 
-            if (!updating) {
+            thisData.merk_produk = dataUpdate.merk_produk
+            thisData.merk_status = dataUpdate.merk_status
+
+            await thisData.save()
+            return thisData
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
 
-            return await Merk.find(params.id)
-        } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
@@ -109,19 +95,15 @@ class MerkController {
         }
     }
 
-    async delete({ params, request, response }) {
+    async delete({ params, response }) {
         try {
-            const thisData = await Merk.query()
-                .where({ id_mitra: request.input('id_mitra'), id_merk_produk: params.id })
-                .first()
-            if (!thisData) {
+            const thisData = await Merk.findOrFail(params.id)
+            await thisData.delete()
+            return response.json({ message: 'Merk berhasil dihapus' })
+        } catch (error) {
+            if(error.name === 'ModelNotFoundException'){
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
-
-            const merk = await Merk.find(params.id)
-            await merk.delete()
-            return response.json({ message: 'success' })
-        } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
