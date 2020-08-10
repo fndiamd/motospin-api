@@ -4,6 +4,7 @@ const Pegawai = use('App/Models/MitraPegawai')
 const PegawaiToken = use('App/Models/TokenPegawai')
 const Mail = use('Mail')
 const MailChecker = require('./../../../../node_modules/mailchecker')
+const Env = use('Env')
 
 class PegawaiController {
     async register({ request, auth, response }) {
@@ -116,7 +117,7 @@ class PegawaiController {
             })
 
             const nama = thisPegawai.pegawai_nama
-            const link = "https://calibrapps-lab.site/api/v1/auth/pegawai-reset-password/" + thisToken.token
+            const link = `${Env.APP_URL}api/v1/auth/pegawai-reset-password/${thisToken.token}`
 
             await Mail.send('forgot-password', { nama, link }, (message) => {
                 message.to(thisPegawai.pegawai_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisPegawai.pegawai_nama + ' Motospin')

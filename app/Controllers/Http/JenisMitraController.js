@@ -8,7 +8,7 @@ class JenisMitraController {
 
     async index({ response }) {
         try {
-            const result = await JenisMitra.query().orderBy('created_at', 'desc').fetch()
+            const result = await JenisMitra.query().orderBy('created_at', 'asc').fetch()
             return response.json(result)
         } catch (error) {
             return response.status(error.status).send({

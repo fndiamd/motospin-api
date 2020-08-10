@@ -5,6 +5,7 @@ const OwnerToken = use('App/Models/TokenOwner')
 const KodeOwner = use('App/Models/KodeOwner')
 const Mail = use('Mail')
 const MailChecker = require('./../../../../node_modules/mailchecker')
+const Env = use('Env')
 
 class OwnerController {
 
@@ -187,7 +188,7 @@ class OwnerController {
             })
 
             const nama = thisOwner.owner_nama
-            const link = "https://calibrapps-lab.site/api/v1/auth/owner-reset-password/" + thisToken.token
+            const link = `${Env.APP_URL}api/v1/auth/owner-reset-password/${thisToken.token}`
             const sendMail = await Mail.send('forgot-password', { nama, link }, (message) => {
                 message.to(thisOwner.owner_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisOwner.owner_nama + ' Motospin')
             })

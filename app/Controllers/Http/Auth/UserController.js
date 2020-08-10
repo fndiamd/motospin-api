@@ -5,6 +5,7 @@ const UserToken = use('App/Models/Token')
 const KodeUser = use('App/Models/KodeUser')
 const Mail = use('Mail')
 const MailChecker = require('./../../../../node_modules/mailchecker')
+const Env = use('Env')
 
 class UserController {
 
@@ -193,7 +194,7 @@ class UserController {
             })
 
             const nama = thisUser.user_nama
-            const link = "https://calibrapps-lab.site/api/v1/auth/user-reset-password/" + thisToken.token
+            const link = `${Env.APP_URL}api/v1/auth/user-reset-password/${thisToken.token}`
             const sendMail = await Mail.send('forgot-password', { nama, link }, (message) => {
                 message.to(thisUser.user_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisUser.user_nama + ' Motospin')
             })
