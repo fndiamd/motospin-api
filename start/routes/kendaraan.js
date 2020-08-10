@@ -1,7 +1,7 @@
 const Route = use('Route')
 
 Route.group(() => {
-    Route.get('index/:page', 'KendaraanController.index')
+    Route.get('index', 'KendaraanController.index')
     Route.get('view/:id', 'KendaraanController.view')
     Route.post('store', 'KendaraanController.store')
     Route.put('update/:id', 'KendaraanController.update')

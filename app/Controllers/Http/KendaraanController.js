@@ -4,15 +4,20 @@ const Kendaraan = use('App/Models/Kendaraan')
 
 class KendaraanController {
 
-    async index({ auth, response, params }) {
+    async index({ auth, response, request }) {
         try {
-            const page = params.page || 1
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            let page = pagination.page || 1
+            let limit = pagination.limit || 5
+            let column = pagination.column || 'created_at'
+            let sort = pagination.sort || 'desc'
+
             const authData = await auth.authenticator('user').getUser()
             const thisKendaraans = await Kendaraan
                 .query()
                 .where({ id_user: authData.id_user })
-                .orderBy('updated_at', 'desc')
-                .paginate(page, 5)
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
             return response.json(thisKendaraans)
         } catch (error) {
             return response.status(error.status).send({
@@ -84,12 +89,14 @@ class KendaraanController {
             id_user: authData.id_user
         }
 
-        const checkExists = await Kendaraan.query().where({ kendaraan_nopol: dataUpdate.kendaraan_nopol }).first()
-        if (checkExists) {
-            return response.json({ message: 'Nomor polisi kendaraan sudah terpakai' })
-        }
-
         try {
+
+            const thisData = await Kendaraan.findOrFail(params.id)
+            const checkExists = await Kendaraan.query().where({ kendaraan_nopol: dataUpdate.kendaraan_nopol }).first()
+            if (checkExists && thisData.kendaraan_nopol != dataUpdate.kendaraan_nopol) {
+                return response.json({ message: 'Nomor polisi kendaraan sudah terpakai' })
+            }
+            
             const updating = await Kendaraan
                 .query()
                 .where({ id_user: authData.id_user, id_kendaraan: params.id })
@@ -104,7 +111,7 @@ class KendaraanController {
             if (error.name === 'ModelNotFoundException') {
                 return response.status(error.status).send({ message: 'Data tidak ditemukan' })
             }
-            return error.name
+            return error.message
         }
     }
 
