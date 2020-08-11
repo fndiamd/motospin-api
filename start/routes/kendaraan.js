@@ -6,4 +6,5 @@ Route.group(() => {
     Route.post('store', 'KendaraanController.store')
     Route.put('update/:id', 'KendaraanController.update')
     Route.delete('delete/:id', 'KendaraanController.delete')
+    Route.post('change-primary/:id', 'KendaraanController.swapPrimaryCar')
 }).prefix('api/v1/kendaraan').middleware(['auth:user'])

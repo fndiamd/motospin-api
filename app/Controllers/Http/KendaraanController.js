@@ -120,7 +120,11 @@ class KendaraanController {
             if (error.name === 'ModelNotFoundException') {
                 return response.status(error.status).send({ message: 'Data tidak ditemukan' })
             }
-            return error.message
+            return response.status(error.status).send({
+                status: error.status,
+                error: error.name,
+                message: error.message
+            })
         }
     }
 
@@ -140,7 +144,26 @@ class KendaraanController {
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
         } catch (error) {
-            return error.message
+            return response.status(error.status).send({
+                status: error.status,
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async swapPrimaryCar({ auth, response, params }){
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            await Kendaraan.query().where({ id_user: authData.id_user, kendaraan_utama: true }).update({ kendaraan_utama: false })
+            await Kendaraan.query().where({ id_user: authData.id_user, id_kendaraan: params.id}).update({ kendaraan_utama: true })
+            return response.json({ message: 'Berhasil mengganti mobil utama' })
+        } catch (error) {
+            return response.status(error.status).send({
+                status: error.status,
+                error: error.name,
+                message: error.message
+            })
         }
     }
 

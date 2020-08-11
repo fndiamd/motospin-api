@@ -106,6 +106,10 @@ class MerkKendaraanController {
         }
     }
 
+    async getAll({ response }){
+        return response.json(await MerkKendaraan.query().fetch()) 
+    }
+
 }
 
 module.exports = MerkKendaraanController
