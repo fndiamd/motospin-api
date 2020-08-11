@@ -107,7 +107,7 @@ class MerkKendaraanController {
     }
 
     async getAll({ response }){
-        return response.json(await MerkKendaraan.query().fetch()) 
+        return response.json(await MerkKendaraan.query().orderBy('merk_kendaraan', 'asc').fetch()) 
     }
 
 }
