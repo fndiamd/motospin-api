@@ -1,6 +1,8 @@
 'use strict'
 
 const MitraOutlet = use('App/Models/MitraOutlet')
+const Env = use('Env')
+const Helpers = use('Helpers')
 
 class MitraOutletController {
 
@@ -46,7 +48,7 @@ class MitraOutletController {
 
     async nearest({ request, response }) {
         try {
-            
+
             const location = request.only(['lat', 'long'])
             const result = await MitraOutlet
                 .query()
@@ -85,16 +87,33 @@ class MitraOutletController {
 
     async store({ auth, request, response }) {
         try {
+            const imgOutlet = request.file('img_outlet', {
+                types: ['jpeg', 'jpg', 'png'],
+                size: '2mb'
+            })
+
             const authData = await auth.authenticator('owner').getUser()
+            const fileName = `${authData.id_owner}-${imgOutlet.clientName}`
+
             const parseData = {
                 mitra_nama: request.input('mitra_nama'),
                 mitra_telp: request.input('mitra_telp'),
                 mitra_alamat: request.input('mitra_alamat'),
                 mitra_long: request.input('mitra_long'),
                 mitra_lat: request.input('mitra_lat'),
-                mitra_status: 0,
+                mitra_status: 1,
+                mitra_img_path: `${Env.get('APP_URL')}/api/v1/mitra-outlet/img-url/${fileName}`,
                 id_jenis_mitra: request.input('id_jenis_mitra'),
                 id_owner: authData.id_owner,
+            }
+
+            await imgOutlet.move(Helpers.publicPath('uploads/mitra-outlet'), {
+                name: fileName,
+                overwrite: true
+            })
+
+            if (!imgOutlet.moved()) {
+                return imgOutlet.error()
             }
 
             const exec = await MitraOutlet.create(parseData)
@@ -109,26 +128,58 @@ class MitraOutletController {
     }
 
     async update({ auth, params, request, response }) {
-        const authData = await auth.authenticator('owner').getUser()
-        const dataUpdate = {
-            mitra_nama: request.input('mitra_nama'),
-            mitra_telp: request.input('mitra_telp'),
-            mitra_alamat: request.input('mitra_alamat'),
-            mitra_long: request.input('mitra_long'),
-            mitra_lat: request.input('mitra_lat'),
-            id_jenis_mitra: request.input('id_jenis_mitra'),
-        }
-
         try {
-            const updating = await MitraOutlet
+            const authData = await auth.authenticator('owner').getUser()
+            const thisData = await MitraOutlet
                 .query()
                 .where({ id_owner: authData.id_owner, id_mitra: params.id })
-                .update(dataUpdate)
-
-            if (updating) {
-                return await MitraOutlet.find(params.id)
-            } else {
+                .first()
+            if(!thisData){
                 return response.status(404).send({ message: 'Outlet tidak ditemukan' })
+            }
+
+            const dataUpdate = {
+                mitra_nama: request.input('mitra_nama'),
+                mitra_telp: request.input('mitra_telp'),
+                mitra_alamat: request.input('mitra_alamat'),
+                mitra_long: request.input('mitra_long'),
+                mitra_lat: request.input('mitra_lat'),
+                id_jenis_mitra: request.input('id_jenis_mitra'),
+                mitra_status: request.input('mitra_status')
+            }
+
+            if (request.file('img_outlet') != null) {
+                const imgOutlet = request.file('img_outlet', {
+                    types: ['jpeg', 'jpg', 'png'],
+                    size: '2mb'
+                })
+
+                const fileName = `${authData.id_owner}-${imgOutlet.clientName}`
+
+                await logoFile.move(Helpers.publicPath('uploads/kategori'), {
+                    name: nameLogo,
+                    overwrite: true
+                })
+
+                if (!logoFile.moved()) {
+                    return logoFile.error()
+                }
+
+                thisData.mitra_img_path = `${Env.get('APP_URL')}/api/v1/mitra-outlet/img-url/${fileName}`
+            }
+
+            try {
+                thisData.mitra_nama = dataUpdate.mitra_nama
+                thisData.mitra_telp = dataUpdate.mitra_telp
+                thisData.mitra_alamat = dataUpdate.mitra_alamat
+                thisData.mitra_long = dataUpdate.mitra_long
+                thisData.mitra_lat = dataUpdate.mitra_lat
+                thisData.mitra_status = dataUpdate.mitra_status
+
+                await thisData.save()
+                return response.json(thisData)
+            } catch (error) {
+                return error.message
             }
 
         } catch (error) {
@@ -137,7 +188,7 @@ class MitraOutletController {
                     message: 'Data tidak ditemukan'
                 })
             }
-            return response.send(error.status).send({
+            return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
                 message: error.message
@@ -227,6 +278,10 @@ class MitraOutletController {
         } catch (error) {
             return error.message
         }
+    }
+
+    async image_path({ response, params }) {
+        return response.download(Helpers.publicPath(`uploads/mitra_outlet/${params.file}`))
     }
 
 }

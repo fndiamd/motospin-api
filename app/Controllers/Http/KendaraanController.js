@@ -15,6 +15,8 @@ class KendaraanController {
             const authData = await auth.authenticator('user').getUser()
             const thisKendaraans = await Kendaraan
                 .query()
+                .with('merk')
+                .with('tipe')
                 .where({ id_user: authData.id_user })
                 .orderBy(`${column}`, `${sort}`)
                 .paginate(page, limit)
@@ -53,12 +55,19 @@ class KendaraanController {
             const authData = await auth.authenticator('user').getUser()
             const data = {
                 kendaraan_nopol: request.input('kendaraan_nopol'),
-                kendaraan_merk: request.input('kendaraan_merk'),
-                kendaraan_tipe: request.input('kendaraan_tipe'),
+                id_merk_kendaraan: request.input('id_merk_kendaraan'),
+                id_tipe_kendaraan: request.input('id_tipe_kendaraan'),
                 kendaraan_tahun: request.input('kendaraan_tahun'),
                 kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
                 kendaraan_no_mesin: request.input('kendaraan_no_mesin'),
-                id_user: authData.id_user
+                id_user: authData.id_user,
+                kendaraan_utama: false
+            }
+
+            const countCar = await Kendaraan.query().where({ 'id_user': authData.id_user }).count('* as total')
+
+            if (countCar[0]['total'] == 0) {
+                data.kendaraan_utama = true
             }
 
             const checkExists = await Kendaraan.query().where({ kendaraan_nopol: data.kendaraan_nopol }).first()
@@ -81,8 +90,8 @@ class KendaraanController {
         const authData = await auth.authenticator('user').getUser()
         const dataUpdate = {
             kendaraan_nopol: request.input('kendaraan_nopol'),
-            kendaraan_merk: request.input('kendaraan_merk'),
-            kendaraan_tipe: request.input('kendaraan_tipe'),
+            id_merk_kendaraan: request.input('id_merk_kendaraan'),
+            id_tipe_kendaraan: request.input('id_tipe_kendaraan'),
             kendaraan_tahun: request.input('kendaraan_tahun'),
             kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
             kendaraan_no_mesin: request.input('kendaraan_no_mesin'),
@@ -96,7 +105,7 @@ class KendaraanController {
             if (checkExists && thisData.kendaraan_nopol != dataUpdate.kendaraan_nopol) {
                 return response.json({ message: 'Nomor polisi kendaraan sudah terpakai' })
             }
-            
+
             const updating = await Kendaraan
                 .query()
                 .where({ id_user: authData.id_user, id_kendaraan: params.id })
@@ -115,7 +124,7 @@ class KendaraanController {
         }
     }
 
-    async delete({ auth, request, response, params }) {
+    async delete({ auth, response, params }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const thisKendaraan = await Kendaraan

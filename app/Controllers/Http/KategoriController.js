@@ -100,7 +100,7 @@ class KategoriController {
             const checkExists = await Kategori.findBy('kategori_produk', request.input('kategori_produk'))
 
             if (checkExists && thisData.kategori_produk != request.input('kategori_produk')) {
-                return response.status(404).send({ message: 'Kategori sudah ada!' })
+                return response.status(400).send({ message: 'Kategori sudah ada!' })
             }
 
             if (request.file('logo_file') != null) {

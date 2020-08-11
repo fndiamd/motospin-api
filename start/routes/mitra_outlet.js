@@ -6,6 +6,7 @@ Route.group(() => {
     Route.get('/view/:id', 'MitraOutletController.view')
     Route.get('/nearest', 'MitraOutletController.nearest')
     Route.post('/search', 'MitraOutletController.search')
+    Route.get('/img-url/:file',  'KategoriController.image_path')
 }).prefix('api/v1/mitra-outlet')
 
 Route.group(() => {

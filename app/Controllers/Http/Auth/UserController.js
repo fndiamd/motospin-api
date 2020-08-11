@@ -96,6 +96,13 @@ class UserController {
                 "access_token": authentication
             })
         } catch (error) {
+            if(error.name === 'PasswordMisMatchException'){
+                return response.status(401).send({ message: 'Password salah! Cek kembali password anda' })
+            }
+
+            if(error.name === 'ModelNotFoundException'){
+                return response.status(404).send({ message: 'User tidak terdaftar!' })
+            }
             return response.status(error.status).send({
                 status: error.status,
                 error: error.name,
@@ -231,9 +238,9 @@ class UserController {
                 await thisUser.save()
                 await thisToken.save()
 
-                return response.status(200).send({ status: true })
+                return response.status(200).send({ status: 'Berhasil ganti password!' })
             } else {
-                return response.status(400).send({ message: "password tidak sama" })
+                return response.status(400).send({ message: "Password tidak sama" })
             }
 
         } catch (error) {

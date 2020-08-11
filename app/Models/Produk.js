@@ -27,6 +27,14 @@ class Produk extends Model {
     detailOrder(){
         return this.hasMany('App/Models/DetailOrderSparepart')
     }
+
+    rating(){
+        return this.hasMany('App/Models/RatingProduk')
+    }
+
+    gambar(){
+        return this.hasMany('App/Models/GambarProduk')
+    }
 }
 
 module.exports = Produk

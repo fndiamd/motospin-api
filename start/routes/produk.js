@@ -6,6 +6,10 @@ Route.group(() => {
 }).prefix('api/v1/produk')
 
 Route.group(() => {
+    Route.get('recommended-sparepart', 'ProdukController.recommendProduct')
+}).prefix('api/v1/produk').middleware(['auth:user'])
+
+Route.group(() => {
     Route.get('own-produk', 'ProdukController.ownProduk')
     Route.post('store', 'ProdukController.store')
     Route.put('update/:id', 'ProdukController.update')

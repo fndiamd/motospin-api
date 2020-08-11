@@ -4,15 +4,24 @@
 const Schema = use('Schema')
 
 class KendaraanSchema extends Schema {
-  up () {
+  up() {
     this.create('kendaraans', (table) => {
       table.increments('id_kendaraan')
       table.string('kendaraan_nopol', 10).notNullable()
-      table.string('kendaraan_merk', 50).notNullable()
-      table.string('kendaraan_tipe', 50).notNullable()
+      table.integer('id_merk_kendaraan')
+        .unsigned()
+        .references('id_merk_kendaraan')
+        .inTable('merk_kendaraans')
+        .onDelete('SET NULL')
+      table.integer('id_tipe_kendaraan')
+        .unsigned()
+        .references('id_tipe_kendaraan')
+        .inTable('tipe_kendaraans')
+        .onDelete('SET NULL')
       table.integer('kendaraan_tahun').notNullable()
       table.string("kendaraan_no_rangka", 20)
       table.string("kendaraan_no_mesin", 20)
+      table.boolean("kendaraan_utama").defaultTo(false)
       table.integer('id_user')
         .unsigned()
         .references('id_user')
@@ -23,7 +32,7 @@ class KendaraanSchema extends Schema {
     })
   }
 
-  down () {
+  down() {
     this.drop('kendaraans')
   }
 }

@@ -1,6 +1,7 @@
 'use strict'
 
 const Produk = use('App/Models/Produk')
+const Kendaraan = use('App/Models/Kendaraan')
 
 class ProdukController {
 
@@ -168,6 +169,20 @@ class ProdukController {
                 message: error.message
             })
         }
+    }
+
+    async recommendProduct({ auth }){
+        const authData = await auth.authenticator('user').getUser()
+        const kendaraanUser = await Kendaraan.query().where({ id_user: authData.id_user }).fetch()
+        const dataMerk = []
+        const dataTipe = []
+        kendaraanUser.toJSON().map(element => {
+            dataMerk.push(element.kendaraan_merk)
+            dataTipe.push(element.kendaraan_tipe)
+        })
+
+        const recommended = await Produk.query().whereIn('`produk_tipe_kendaraan`', dataTipe).fetch()
+        return recommended
     }
 
 }

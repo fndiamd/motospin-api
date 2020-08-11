@@ -63,6 +63,10 @@ class User extends Model {
   sewaRental(){
     return this.hasMany('App/Models/SewaRental')
   }
+
+  rating(){
+    return this.hasMany('App/Models/RatingProduk')
+  }
 }
 
 module.exports = User
