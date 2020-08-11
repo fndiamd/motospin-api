@@ -156,13 +156,13 @@ class MitraOutletController {
 
                 const fileName = `${authData.id_owner}-${imgOutlet.clientName}`
 
-                await logoFile.move(Helpers.publicPath('uploads/kategori'), {
+                await imgOutlet.move(Helpers.publicPath('uploads/kategori'), {
                     name: nameLogo,
                     overwrite: true
                 })
 
-                if (!logoFile.moved()) {
-                    return logoFile.error()
+                if (!imgOutlet.moved()) {
+                    return imgOutlet.error()
                 }
 
                 thisData.mitra_img_path = `${Env.get('APP_URL')}/api/v1/mitra-outlet/img-url/${fileName}`

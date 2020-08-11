@@ -167,6 +167,20 @@ class KendaraanController {
         }
     }
 
+    async getPrimaryCar({ auth, response }){
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            const primaryCar = await Kendaraan.query().where({ id_user: authData.id_user, kendaraan_utama: true }).first()
+            return response.json(primaryCar)
+        } catch (error) {
+            return response.status(error.status).send({
+                status: error.status,
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 module.exports = KendaraanController
