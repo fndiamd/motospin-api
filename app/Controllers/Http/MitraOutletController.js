@@ -70,7 +70,7 @@ class MitraOutletController {
                         jenis_mitra: e.jenisMitra.jenis_mitra,
                         owner: e.owner.owner_nama,
                         mitra_status: e.mitra_status,
-                        jarak: this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long)
+                        jarak: Math.round(this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) * 10) / 10 
                     })
                 }
             })
