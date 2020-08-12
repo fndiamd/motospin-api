@@ -12,6 +12,8 @@
 
 /** @type {import('@adonisjs/lucid/src/Factory')} */
 const Factory = use('Factory')
+const Env = use('Env')
+const MitraOutlet = use('App/Models/MitraOutlet')
 
 class MitraOutletSeeder {
   async run () {
@@ -134,6 +136,8 @@ class MitraOutletSeeder {
         id_owner: 1
       }
     ]
+
+    await MitraOutlet.createMany(data)
   }
 }
 
