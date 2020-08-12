@@ -1,6 +1,8 @@
 'use strict'
 
 const MerkKendaraan = use('App/Models/MerkKendaraan')
+const Helpers = use('Helpers')
+const Env = use('Env')
 
 class MerkKendaraanController {
 
@@ -46,12 +48,31 @@ class MerkKendaraanController {
 
     async store({ request, response }) {
         try {
+            const logoFile = request.file('logo_file', {
+                types: ['png'],
+                size: '1mb'
+            })
+            let nameLogo = logoFile.clientName
+
             const checkExists = await MerkKendaraan.findBy('merk_kendaraan', request.input('merk_kendaraan'))
             if(checkExists){
                 return response.status(400).send({ message: 'Merk Kendaraan sudah ada!' })
             }
 
-            const exec = await MerkKendaraan.create({ merk_kendaraan: request.input('merk_kendaraan') })
+            await logoFile.move(Helpers.publicPath('uploads/merk-kendaraan'), {
+                name: nameLogo,
+                overwrite: true
+            })
+
+            if(!logoFile.moved()){
+                return logoFile.error()
+            }
+
+            const exec = await MerkKendaraan.create({ 
+                merk_kendaraan: request.input('merk_kendaraan'),
+                merk_kendaraan_img_path: `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/${nameLogo}`
+            })
+
             return response.json(exec)
         } catch (error) {
             return response.status(error.status).send({
@@ -64,10 +85,33 @@ class MerkKendaraanController {
 
     async update({ request, response, params }) {
         try {
+            const logoFile = request.file('logo_file', {
+                types: ['png'],
+                size: '1mb'
+            })
+            let nameLogo = logoFile.clientName
+
             const thisData = await MerkKendaraan.findOrFail(params.id)
             const checkExists = await MerkKendaraan.findBy('merk_kendaraan', request.input('merk_kendaraan'))
             if(checkExists && thisData.merk_kendaraan != request.input('merk_kendaraan')){
                 return response.status(400).send({ message: 'Merk Kendaraan sudah ada!' })
+            }
+
+            if(request.file('logo_file') != null){
+                try {
+                    await logoFile.move(Helpers.publicPath('uploads/jenis-mitra'), {
+                        name: nameLogo,
+                        overwrite: true
+                    })
+                } catch (error) {
+                    return error.message
+                }
+
+                if (!logoFile.moved()) {
+                    return logoFile.error()
+                }
+
+                thisData.merk_kendaraan_img_path = `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/${nameLogo}`
             }
 
             thisData.merk_kendaraan = request.input('merk_kendaraan')
@@ -108,6 +152,10 @@ class MerkKendaraanController {
 
     async getAll({ response }){
         return response.json(await MerkKendaraan.query().orderBy('merk_kendaraan', 'asc').fetch()) 
+    }
+
+    async image_path({ response, params }) {
+        return response.download(Helpers.publicPath(`uploads/merk-kendaraan/${params.file}`))
     }
 
 }

@@ -48,14 +48,10 @@ class JenisMitraController {
                 return response.status(400).send({ message: 'Jenis mitra sudah ada!' })
             }
 
-            try {
-                await logoFile.move(Helpers.publicPath('uploads/jenis_mitra'), {
-                    name: nameLogo,
-                    overwrite: true
-                })
-            } catch (error) {
-                return error.message
-            }
+            await logoFile.move(Helpers.publicPath('uploads/jenis-mitra'), {
+                name: nameLogo,
+                overwrite: true
+            })
 
             if (!logoFile.moved()) {
                 return logoFile.error()
@@ -92,7 +88,7 @@ class JenisMitraController {
 
             if (request.file('logo_file') != null) {
                 try {
-                    await logoFile.move(Helpers.publicPath('uploads/jenis_mitra'), {
+                    await logoFile.move(Helpers.publicPath('uploads/jenis-mitra'), {
                         name: nameLogo,
                         overwrite: true
                     })
@@ -139,7 +135,7 @@ class JenisMitraController {
     }
 
     async image_path({ response, params }) {
-        return response.download(Helpers.publicPath(`uploads/jenis_mitra/${params.file}`))
+        return response.download(Helpers.publicPath(`uploads/jenis-mitra/${params.file}`))
     }
 
 }

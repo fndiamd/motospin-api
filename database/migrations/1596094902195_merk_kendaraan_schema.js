@@ -8,6 +8,7 @@ class MerkKendaraanSchema extends Schema {
     this.create('merk_kendaraans', (table) => {
       table.increments('id_merk_kendaraan')
       table.string('merk_kendaraan', 100)
+      table.string('merk_kendaraan_img_path', 200)
       table.timestamps()
     })
   }

@@ -281,7 +281,7 @@ class MitraOutletController {
     }
 
     async image_path({ response, params }) {
-        return response.download(Helpers.publicPath(`uploads/mitra_outlet/${params.file}`))
+        return response.download(Helpers.publicPath(`uploads/mitra-outlet/${params.file}`))
     }
 
 }
