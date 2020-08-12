@@ -99,7 +99,7 @@ class MerkKendaraanController {
 
             if(request.file('logo_file') != null){
                 try {
-                    await logoFile.move(Helpers.publicPath('uploads/jenis-mitra'), {
+                    await logoFile.move(Helpers.publicPath('uploads/merk-kendaraan'), {
                         name: nameLogo,
                         overwrite: true
                     })

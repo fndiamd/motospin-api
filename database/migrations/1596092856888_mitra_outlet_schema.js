@@ -14,6 +14,8 @@ class MitraOutletSchema extends Schema {
       table.string('mitra_lat', 50).notNullable()
       table.string('mitra_img_path', 200)
       table.integer('mitra_status').defaultTo(1)
+      table.time('mitra_jam_buka').notNullable()
+      table.time('mitra_jam_tutup').notNullable()
       table.integer('id_jenis_mitra')
         .unsigned()
         .references('id_jenis_mitra')

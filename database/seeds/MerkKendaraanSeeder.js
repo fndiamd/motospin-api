@@ -39,7 +39,7 @@ class MerkKendaraanSeeder {
       },
       {
         merk_kendaraan: "MITSUBISHI",
-        merk_kendaraan_img_path: `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/mitshubishi.png`
+        merk_kendaraan_img_path: `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/mitsubishi.png`
       },
       {
         merk_kendaraan: "AUDI",
@@ -130,8 +130,8 @@ class MerkKendaraanSeeder {
         merk_kendaraan_img_path: `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/wuling.png`
       },
       {
-        merk_kendaraan: "FERARRI",
-        merk_kendaraan_img_path: `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/ferarri.png`
+        merk_kendaraan: "FERRARI",
+        merk_kendaraan_img_path: `${Env.get('APP_URL')}/api/v1/merk-kendaraan/img-url/ferrari.png`
       }
     ]
 
