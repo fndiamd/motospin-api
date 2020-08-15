@@ -2,6 +2,11 @@
 
 const Produk = use('App/Models/Produk')
 const Kendaraan = use('App/Models/Kendaraan')
+const GambarProduk = use('App/Models/GambarProduk')
+const KompatibelProduk = use('App/Models/KompatibelProduk')
+
+const Helpers = use('Helpers')
+const Env = use('Env')
 
 class ProdukController {
 
@@ -14,9 +19,8 @@ class ProdukController {
             let sort = pagination.sort || 'desc'
 
             const result = await Produk.query()
-                .with('kategori')
-                .with('merk')
                 .with('outlet')
+                .with('gambar')
                 .orderBy(`${column}`, `${sort}`)
                 .paginate(page, limit)
 
@@ -56,31 +60,13 @@ class ProdukController {
 
     async store({ request, response }) {
         try {
-            const data = {
-                produk_nama: request.input('produk_nama'),
-                produk_merk_kendaraan: request.input('produk_merk_kendaraan'),
-                produk_tipe_kendaraan: request.input('produk_tipe_kendaraan'),
-                produk_tahun_kendaraan: request.input('produk_tahun_kendaraan'),
-                produk_stok: request.input('produk_stok'),
-                produk_harga: request.input('produk_harga'),
-                produk_berat: request.input('produk_berat'),
-                id_merk_produk: request.input('id_merk_produk'),
-                id_kategori_produk: request.input('id_kategori_produk'),
-                id_mitra: request.input('id_mitra')
-            }
-
-            try {
-                const exec = await Produk.create(data)
-                return response.json(exec)
-            } catch (error) {
-                return error.message
-            }
+            const produk = await this.storeProduct({ request, response })
+            const id_produk = produk.id_produk
+            const gambarProduk = await this.storeProductPicture({ request, response }, id_produk)
+            const kompatibelProduk = await this.storeCompatibleProduct({ request, response }, id_produk)
+            return { produk, gambarProduk, kompatibelProduk }
         } catch (error) {
-            return response.status(error.status).send({
-                status: error.status,
-                error: error.name,
-                message: error.message
-            })
+            return error.message
         }
     }
 
@@ -88,14 +74,9 @@ class ProdukController {
         try {
             const dataUpdate = {
                 produk_nama: request.input('produk_nama'),
-                produk_merk_kendaraan: request.input('merk_kendaraan'),
-                produk_tipe_kendaraan: request.input('tipe_kendaraan'),
-                produk_tahun_kendaraan: request.input('tahun_kendaraan'),
                 produk_stok: request.input('produk_stok'),
                 produk_harga: request.input('produk_harga'),
-                produk_berat: request.input('produk_berat'),
-                id_merk_produk: request.input('id_merk_produk'),
-                id_kategori_produk: request.input('id_kategori_produk'),
+                produk_berat: request.input('produk_berat')
             }
 
             const updating = await Produk.query()
@@ -171,7 +152,7 @@ class ProdukController {
         }
     }
 
-    async recommendProduct({ auth }){
+    async recommendProduct({ auth }) {
         const authData = await auth.authenticator('user').getUser()
         const kendaraanUser = await Kendaraan.query().where({ id_user: authData.id_user }).fetch()
         const dataMerk = []
@@ -184,6 +165,103 @@ class ProdukController {
         const recommended = await Produk.query().whereIn('`produk_tipe_kendaraan`', dataTipe).fetch()
         return recommended
     }
+
+    async storeProduct({ request, response }) {
+        try {
+            const data = {
+                produk_nama: request.input('produk_nama'),
+                produk_stok: request.input('produk_stok'),
+                produk_harga: request.input('produk_harga'),
+                produk_berat: request.input('produk_berat'),
+                id_mitra: request.input('id_mitra')
+            }
+
+            const produk = await Produk.create(data)
+            return produk
+        } catch (error) {
+            return response.status(error.status).send({
+                sector: 'Produk',
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async storeProductPicture({ request, response }, id_produk) {
+        try {
+            const imgProduct = request.file('img_produk', {
+                types: ['image', 'jpg', 'png', 'jpeg'],
+                size: '2mb'
+            })
+
+            await imgProduct.moveAll(Helpers.publicPath('uploads/produk'), (file) => {
+                return {
+                    name: `${id_produk}-${file.clientName}`
+                }
+            })
+
+            const fs = Helpers.promisify(require('fs'))
+            const removeFile = Helpers.promisify(fs.unlink)
+            const movedFiles = imgProduct.movedList()
+
+            if (!imgProduct.movedAll()) {
+
+                await Promise.all(movedFiles.map((file) => {
+                    return removeFile(path.join(file._location, file.fileName))
+                }))
+
+                return imgProduct.errors()
+            }
+
+            const gambars = []
+
+            await Promise.all(movedFiles.map((file) => {
+                gambars.push({
+                    id_produk: id_produk,
+                    gambar_url_path: `${Env.get('APP_URL')}/api/v1/gambar-produk/img-url/${id_produk}/${file.fileName}`
+                })
+            }))
+
+            const gambarProduk = await GambarProduk.createMany(gambars)
+            return gambarProduk
+        } catch (error) {
+            return response.status(error.status).send({
+                sector: 'Gambar Produk',
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async storeCompatibleProduct({ request, response }, id_produk) {
+        try {
+            const data = request.collect(['id_tipe_kendaraan', 'kompatibel_tahun_kendaraan', 'kompatibel_nomor_rangka'])
+            const storeData = []
+            data.map(e => {
+                storeData.push({
+                    id_tipe_kendaraan: e.id_tipe_kendaraan,
+                    kompatibel_tahun_kendaraan: e.kompatibel_tahun_kendaraan,
+                    kompatibel_nomor_rangka: JSON.stringify(e.kompatibel_nomor_rangka),
+                    id_produk: id_produk
+                })
+            })
+
+            try {
+                const r = await KompatibelProduk.createMany(storeData)
+                return r
+            } catch (error) {
+                return {error: error.name, msg: error.message}
+            }
+            
+        } catch (error) {
+            return response.status(error.status).send({
+                sector: 'Kompatibel Produk',
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
 
 }
 

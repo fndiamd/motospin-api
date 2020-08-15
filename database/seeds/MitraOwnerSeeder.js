@@ -19,7 +19,7 @@ class MitraOwnerSeeder {
     const data = {
       owner_nama: 'Motospin Master',
       owner_telp: '031882991',
-      onwer_email: 'master@motospin.id',
+      owner_email: 'master@motospin.id',
       owner_password: 'password',
       owner_status: 1
     }

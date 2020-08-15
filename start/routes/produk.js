@@ -3,6 +3,7 @@ const Route = use('Route')
 Route.group(() => {
     Route.get('index', 'ProdukController.index')
     Route.get('view/:id', 'ProdukController.view')
+    Route.post('coba', 'ProdukController.storeCompatibleProduct')
 }).prefix('api/v1/produk')
 
 Route.group(() => {

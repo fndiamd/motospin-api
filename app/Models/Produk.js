@@ -33,7 +33,11 @@ class Produk extends Model {
     }
 
     gambar(){
-        return this.hasMany('App/Models/GambarProduk')
+        return this.hasMany('App/Models/GambarProduk', 'id_produk', 'id_produk')
+    }
+
+    kompatibelProduk(){
+        return this.hasMany('App/Models/KompatibelProduk', 'id_produk', 'id_produk')
     }
 }
 

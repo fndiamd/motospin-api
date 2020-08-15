@@ -75,6 +75,8 @@ class MitraOutletController {
                 }
             })
 
+            data.sort((a, b) => (a.jarak > b.jarak) ? 1 : ((b.jarak > a.jarak) ? -1 : 0))
+
             return data
         } catch (error) {
             return response.status(error.status).send({
