@@ -3,10 +3,10 @@
 /** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
-class KeranjangBelanjaSchema extends Schema {
+class KeranjangProdukSchema extends Schema {
   up () {
-    this.create('keranjang_belanjas', (table) => {
-      table.increments('id_keranjang')
+    this.create('keranjang_produks', (table) => {
+      table.increments('id_keranjang_produk')
       table.integer('id_user')
         .unsigned()
         .references('id_user')
@@ -25,8 +25,8 @@ class KeranjangBelanjaSchema extends Schema {
   }
 
   down () {
-    this.drop('keranjang_belanjas')
+    this.drop('keranjang_produks')
   }
 }
 
-module.exports = KeranjangBelanjaSchema
+module.exports = KeranjangProdukSchema

@@ -3,11 +3,17 @@
 /** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
-class KendaraanSchema extends Schema {
+class KendaraanUserSchema extends Schema {
   up() {
-    this.create('kendaraans', (table) => {
-      table.increments('id_kendaraan')
-      table.string('kendaraan_nopol', 10).notNullable()
+    this.create('kendaraan_users', (table) => {
+      table.increments('id_kendaraan_user')
+      table.string('kendaraan_user_nopol', 10).notNullable()
+      table.integer('kendaraan_user_tahun').notNullable()
+      table.string('kendaraan_user_warna', 25).notNullable()
+      table.integer('kendaraan_user_transmisi').notNullable()
+      table.string("kendaraan_user_no_rangka", 20)
+      table.string("kendaraan_user_no_mesin", 20)
+      table.boolean("kendaraan_utama").defaultTo(false)
       table.integer('id_merk_kendaraan')
         .unsigned()
         .references('id_merk_kendaraan')
@@ -18,10 +24,6 @@ class KendaraanSchema extends Schema {
         .references('id_tipe_kendaraan')
         .inTable('tipe_kendaraans')
         .onDelete('SET NULL')
-      table.integer('kendaraan_tahun').notNullable()
-      table.string("kendaraan_no_rangka", 20)
-      table.string("kendaraan_no_mesin", 20)
-      table.boolean("kendaraan_utama").defaultTo(false)
       table.integer('id_user')
         .unsigned()
         .references('id_user')
@@ -33,8 +35,8 @@ class KendaraanSchema extends Schema {
   }
 
   down() {
-    this.drop('kendaraans')
+    this.drop('kendaraan_users')
   }
 }
 
-module.exports = KendaraanSchema
+module.exports = KendaraanUserSchema

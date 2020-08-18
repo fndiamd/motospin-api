@@ -3,9 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class KeranjangBelanja extends Model {
+class KeranjangProduk extends Model {
     static get primaryKey(){
-        return 'id_keranjang'
+        return 'id_keranjang_produk'
     }
 
     user(){
@@ -17,4 +17,4 @@ class KeranjangBelanja extends Model {
     }
 }
 
-module.exports = KeranjangBelanja
+module.exports = KeranjangProduk

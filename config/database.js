@@ -79,6 +79,6 @@ module.exports = {
       password: Env.get('DB_PASSWORD', 'postgres'),
       database: Env.get('DB_DATABASE', 'motospin')
     },
-    debug: Env.get('DB_DEBUG', true)
+    debug: Env.get('DB_DEBUG', false)
   }
 }

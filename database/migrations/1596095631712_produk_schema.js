@@ -4,13 +4,23 @@
 const Schema = use('Schema')
 
 class ProdukSchema extends Schema {
-  up () {
+  up() {
     this.create('produks', (table) => {
       table.increments('id_produk')
       table.string('produk_nama', 200).notNullable()
       table.integer('produk_stok')
       table.integer('produk_berat')
       table.integer('produk_harga')
+      table.integer('id_kategori_produk')
+        .unsigned()
+        .references('id_kategori_produk')
+        .inTable('kategori_produks')
+        .onDelete('SET NULL')
+      table.integer('id_merk_produk')
+        .unsigned()
+        .references('id_merk_produk')
+        .inTable('merk_produks')
+        .onDelete('SET NULL')
       table.integer('id_mitra')
         .unsigned()
         .references('id_mitra')
@@ -21,7 +31,7 @@ class ProdukSchema extends Schema {
     })
   }
 
-  down () {
+  down() {
     this.drop('produks')
   }
 }

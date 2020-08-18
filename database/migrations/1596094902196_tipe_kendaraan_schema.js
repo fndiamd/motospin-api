@@ -7,12 +7,12 @@ class TipeKendaraanSchema extends Schema {
   up() {
     this.create('tipe_kendaraans', (table) => {
       table.increments('id_tipe_kendaraan')
+      table.string('tipe_kendaraan', 100)
       table.integer('id_merk_kendaraan')
         .unsigned()
         .references('id_merk_kendaraan')
         .inTable('merk_kendaraans')
         .onDelete('CASCADE')
-      table.string('tipe_kendaraan', 100)
       table.timestamps()
     })
   }

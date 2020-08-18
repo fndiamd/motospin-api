@@ -3,14 +3,14 @@
 /** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
-class DetailOrderSparepartSchema extends Schema {
+class DetailOrderProdukSchema extends Schema {
   up() {
-    this.create('detail_order_spareparts', (table) => {
-      table.increments('id_order_detail')
-      table.integer('id_order_sparepart')
+    this.create('detail_order_produks', (table) => {
+      table.increments('id_detail_order_produk')
+      table.integer('id_order_produk')
         .unsigned()
-        .references('id_order_sparepart')
-        .inTable('order_spareparts')
+        .references('id_order_produk')
+        .inTable('order_produks')
         .onUpdate('CASCADE')
         .onDelete('CASCADE')
       table.integer('id_produk')
@@ -20,14 +20,14 @@ class DetailOrderSparepartSchema extends Schema {
         .onUpdate('CASCADE')
         .onDelete('CASCADE')
       table.integer('jumlah').defaultTo(1)
-      table.integer('harga')
+      table.integer('harga_satuan')
       table.timestamps()
     })
   }
 
   down() {
-    this.drop('detail_order_spareparts')
+    this.drop('detail_order_produks')
   }
 }
 
-module.exports = DetailOrderSparepartSchema
+module.exports = DetailOrderProdukSchema

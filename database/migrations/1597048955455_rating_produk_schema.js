@@ -4,18 +4,26 @@
 const Schema = use('Schema')
 
 class RatingProdukSchema extends Schema {
-  up () {
+  up() {
     this.create('rating_produks', (table) => {
       table.increments('id_rating_produk')
-      table.integer('rating')
+      table.integer('rating_produk')
       table.string('rating_komentar')
-      table.integer('id_produk').unsigned().references('id_produk').inTable('produks').onDelete('CASCADE')
-      table.integer('id_user').unsigned().references('id_user').inTable('users').onDelete('CASCADE')
+      table.integer('id_produk')
+        .unsigned()
+        .references('id_produk')
+        .inTable('produks')
+        .onDelete('CASCADE')
+      table.integer('id_user')
+        .unsigned()
+        .references('id_user')
+        .inTable('users')
+        .onDelete('CASCADE')
       table.timestamps()
     })
   }
 
-  down () {
+  down() {
     this.drop('rating_produks')
   }
 }

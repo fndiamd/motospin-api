@@ -22,21 +22,53 @@ class MitraOutletController {
         return d;
     }
 
+    async paginate(array, page_size, page_number) {
+        return array.slice((page_number - 1) * page_size, page_number * page_size);
+    }
+
     async index({ request, response }) {
         try {
-            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const pagination = request.only(['page', 'limit', 'column'])
+            const location = request.only(['lat', 'long'])
+
             let page = pagination.page || 1
             let limit = pagination.limit || 5
-            let column = pagination.column || 'created_at'
-            let sort = pagination.sort || 'desc'
+            let column = pagination.column || 'jarak'
+
             const result = await MitraOutlet
                 .query()
+                .where({ id_jenis_mitra: request.input('id_jenis_mitra') })
                 .with('owner')
                 .with('jenisMitra')
-                .orderBy(`${column}`, `${sort}`)
-                .paginate(page, limit)
+                .fetch()
 
-            return response.json(result)
+            const data = []
+            let total = 0;
+            result.toJSON().map(e => {
+                data.push({
+                    id_mitra: e.id_mitra,
+                    mitra_nama: e.mitra_nama,
+                    mitra_telp: e.mitra_telp,
+                    mitra_alamat: e.mitra_alamat,
+                    jenis_mitra: e.jenisMitra.jenis_mitra,
+                    owner: e.owner.owner_nama,
+                    mitra_status: e.mitra_status,
+                    mitra_img_path: e.mitra_img_path,
+                    mitra_maps_url: e.mitra_maps_url,
+                    jarak: Math.round(this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) * 10) / 10
+                })
+                total++
+            })
+
+            data.sort((a, b) => (a.jarak > b.jarak) ? 1 : ((b.jarak > a.jarak) ? -1 : 0))
+
+            return response.json({
+                total: total, 
+                page: page,
+                perPage: limit,
+                lastPage: Math.ceil(total / limit),
+                data: await this.paginate(data, limit, page)
+            })
         } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
@@ -49,7 +81,7 @@ class MitraOutletController {
     async nearest({ request, response }) {
         try {
 
-            const location = request.only(['lat', 'long'])
+            const location = request.only(['lat', 'long', 'max'])
             const result = await MitraOutlet
                 .query()
                 .where({ id_jenis_mitra: 1 })
@@ -61,7 +93,7 @@ class MitraOutletController {
             const data = []
 
             result.toJSON().map(e => {
-                if (this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) <= 20) {
+                if (this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) <= location.max) {
                     data.push({
                         id_mitra: e.id_mitra,
                         mitra_nama: e.mitra_nama,
@@ -70,7 +102,9 @@ class MitraOutletController {
                         jenis_mitra: e.jenisMitra.jenis_mitra,
                         owner: e.owner.owner_nama,
                         mitra_status: e.mitra_status,
-                        jarak: Math.round(this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) * 10) / 10 
+                        mitra_img_path: e.mitra_img_path,
+                        mitra_maps_url: e.mitra_maps_url,
+                        jarak: Math.round(this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) * 10) / 10
                     })
                 }
             })
@@ -136,7 +170,7 @@ class MitraOutletController {
                 .query()
                 .where({ id_owner: authData.id_owner, id_mitra: params.id })
                 .first()
-            if(!thisData){
+            if (!thisData) {
                 return response.status(404).send({ message: 'Outlet tidak ditemukan' })
             }
 

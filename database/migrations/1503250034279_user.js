@@ -12,7 +12,9 @@ class UserSchema extends Schema {
       table.string('user_telp', 15).notNullable().unique()
       table.string('user_password', 200).notNullable()
       table.string('user_ktp', 16).unique()
-      table.integer('user_status')
+      table.string('user_avatar_path', 200)
+      table.integer('user_status').defaultTo(0)
+      table.integer('user_level').defaultTo(0)
       table.timestamps()
     })
   }

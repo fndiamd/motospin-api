@@ -1,7 +1,7 @@
 'use strict'
 
 const Produk = use('App/Models/Produk')
-const Kendaraan = use('App/Models/Kendaraan')
+const Kendaraan = use('App/Models/KendaraanUser')
 const GambarProduk = use('App/Models/GambarProduk')
 const KompatibelProduk = use('App/Models/KompatibelProduk')
 
@@ -21,6 +21,9 @@ class ProdukController {
             const result = await Produk.query()
                 .with('outlet')
                 .with('gambar')
+                .with('kategori')
+                .with('merk')
+                .with('kompatibelProduk')
                 .orderBy(`${column}`, `${sort}`)
                 .paginate(page, limit)
 
@@ -154,16 +157,21 @@ class ProdukController {
 
     async recommendProduct({ auth }) {
         const authData = await auth.authenticator('user').getUser()
-        const kendaraanUser = await Kendaraan.query().where({ id_user: authData.id_user }).fetch()
-        const dataMerk = []
-        const dataTipe = []
-        kendaraanUser.toJSON().map(element => {
-            dataMerk.push(element.kendaraan_merk)
-            dataTipe.push(element.kendaraan_tipe)
+        const kendaraanUser = await Kendaraan.query().where({ id_user: authData.id_user, kendaraan_utama: true }).first()
+        const kompatibelProduk = await KompatibelProduk.query().where({ id_tipe_kendaraan: kendaraanUser.id_tipe_kendaraan }).fetch()
+        const id_produk = []
+        kompatibelProduk.toJSON().map(e => {
+            id_produk.push(e.id_produk)
         })
-
-        const recommended = await Produk.query().whereIn('`produk_tipe_kendaraan`', dataTipe).fetch()
-        return recommended
+        const produk = await Produk
+            .query()
+            .with('outlet')
+            .with('gambar')
+            .with('kategori')
+            .with('merk')
+            .with('kompatibelProduk')
+            .whereIn('id_produk', id_produk).fetch()
+        return produk
     }
 
     async storeProduct({ request, response }) {
@@ -173,7 +181,9 @@ class ProdukController {
                 produk_stok: request.input('produk_stok'),
                 produk_harga: request.input('produk_harga'),
                 produk_berat: request.input('produk_berat'),
-                id_mitra: request.input('id_mitra')
+                id_mitra: request.input('id_mitra'),
+                id_kategori_produk: request.input('id_kategori_produk'),
+                id_merk_produk: request.input('id_merk_produk')
             }
 
             const produk = await Produk.create(data)
@@ -250,9 +260,9 @@ class ProdukController {
                 const r = await KompatibelProduk.createMany(storeData)
                 return r
             } catch (error) {
-                return {error: error.name, msg: error.message}
+                return { error: error.name, msg: error.message }
             }
-            
+
         } catch (error) {
             return response.status(error.status).send({
                 sector: 'Kompatibel Produk',
@@ -260,6 +270,37 @@ class ProdukController {
                 message: error.message
             })
         }
+    }
+
+    async updateProduct({ request, response, params }) {
+        try {
+            const data = {
+                produk_nama: request.input('produk_nama'),
+                produk_stok: request.input('produk_stok'),
+                produk_harga: request.input('produk_harga'),
+                produk_berat: request.input('produk_berat'),
+                id_mitra: request.input('id_mitra'),
+                id_kategori_produk: request.input('id_kategori_produk'),
+                id_merk_produk: request.input('id_merk_produk')
+            }
+
+            const produk = await Produk.create(data)
+            return produk
+        } catch (error) {
+            return response.status(error.status).send({
+                sector: 'Produk',
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async updateProductPicture() {
+
+    }
+
+    async updateCompatibleProduct() {
+
     }
 
 
