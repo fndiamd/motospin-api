@@ -32,12 +32,6 @@ class OrderServiceSchema extends Schema {
         .inTable('mitra_outlets')
         .onUpdate('CASCADE')
         .onDelete('CASCADE')
-      table.integer('id_jenis_layanan')
-        .unsigned()
-        .references('id_jenis_layanan')
-        .inTable('jenis_layanans')
-        .onUpdate('CASCADE')
-        .onDelete('CASCADE')
       table.timestamps()
     })
   }

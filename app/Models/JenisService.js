@@ -10,11 +10,11 @@ class JenisService extends Model {
     }
 
     jenisMitra(){
-        return this.belongsTo('App/Models/JenisMitra')
+        return this.belongsTo('App/Models/JenisMitra', 'id_jenis_mitra', 'id_jenis_mitra')
     }
 
     tipeService(){
-        return this.hasMany('App/Models/TipeService')
+        return this.hasMany('App/Models/TipeService', 'id_jenis_service', 'id_jenis_service')
     }
 
 }

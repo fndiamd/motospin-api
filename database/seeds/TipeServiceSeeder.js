@@ -13,6 +13,7 @@
 /** @type {import('@adonisjs/lucid/src/Factory')} */
 const Factory = use('Factory')
 const TipeService = use('App/Models/TipeService')
+
 class TipeServiceSeeder {
   async run () {
     const data = [
@@ -131,8 +132,14 @@ class TipeServiceSeeder {
       {
         tipe_service: 'Service Berkala',
         id_jenis_service: 9
-      }
+      },
+      {
+        tipe_service: 'Online Mekanik',
+        id_jenis_service: 10
+      },
     ]
+
+    await TipeService.createMany(data)
   }
 }
 

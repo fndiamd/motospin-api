@@ -9,16 +9,20 @@ class OrderService extends Model {
         return 'id_order_service'
     }
 
-    jenisLayanan() {
-        return this.belongsTo('App/Models/JenisLayanan')
-    }
-
     user() {
         return this.belongsTo('App/Models/User')
     }
 
     outlet() {
         return this.belongsTo('App/Models/MitraOutlet')
+    }
+
+    merkKendaraan(){
+        return this.belongsTo('App/Models/MerkKendaraan')
+    }
+
+    tipeKendaraan(){
+        return this.belongsTo('App/Models/TipeKendaraan')
     }
 
 }

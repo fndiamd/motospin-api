@@ -1,6 +1,8 @@
 'use strict'
 
 const MitraOutlet = use('App/Models/MitraOutlet')
+const ServiceBengkel = use('App/Models/ServiceBengkel')
+const JenisService = use('App/Models/JenisService')
 const Env = use('Env')
 const Helpers = use('Helpers')
 
@@ -63,7 +65,7 @@ class MitraOutletController {
             data.sort((a, b) => (a.jarak > b.jarak) ? 1 : ((b.jarak > a.jarak) ? -1 : 0))
 
             return response.json({
-                total: total, 
+                total: total,
                 page: page,
                 perPage: limit,
                 lastPage: Math.ceil(total / limit),
@@ -258,16 +260,31 @@ class MitraOutletController {
 
     async view({ params, response }) {
         try {
-            const thisData = await MitraOutlet
+            const thisOutlet = await MitraOutlet
                 .query()
                 .where({ id_mitra: params.id })
-                .with('owner')
-                .with('jenisMitra')
                 .first()
-            if (!thisData) {
+            if (!thisOutlet) {
                 return response.status(404).send({ message: 'Outlet tidak ditemukan' })
             }
-            return thisData
+
+            const serviceOutlet = await ServiceBengkel.query().where({
+                id_mitra: thisOutlet.id_mitra
+            }).fetch()
+
+            const id_jenis_service = []
+            
+            serviceOutlet.toJSON().map(e => {
+                id_jenis_service.push(e.id_jenis_service)
+            })
+
+            const data = {
+                outlet: thisOutlet,
+                service: await JenisService.query().with('tipeService').whereIn('id_jenis_service', id_jenis_service).fetch()
+            }
+
+            return response.json(data)
+
         } catch (error) {
             return response.status(error.status).send({
                 status: error.status,

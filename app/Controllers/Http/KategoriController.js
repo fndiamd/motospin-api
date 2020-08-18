@@ -49,7 +49,7 @@ class KategoriController {
             size: '1mb'
         })
 
-        let nameLogo = request.input('kategori_produk') + '.png'
+        let nameLogo = logoFile.clientName
 
         const data = {
             kategori_produk: request.input('kategori_produk'),

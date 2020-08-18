@@ -16,6 +16,8 @@ require('./routes/produk')
 require('./routes/merk_kendaraan')
 require('./routes/tipe_kendaraan')
 require('./routes/gambar_produk')
+require('./routes/jenis_service')
+require('./routes/service_bengkel')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

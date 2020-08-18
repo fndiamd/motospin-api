@@ -62,6 +62,11 @@ class JenisServiceSeeder {
         jenis_service: 'Umum',
         jenis_service_img_path: `${Env.get('APP_URL')}/api/v1/jenis-service/img-url/`,
         id_jenis_mitra: 1
+      },
+      {
+        jenis_service: 'Online Mekanik',
+        jenis_service_img_path: `${Env.get('APP_URL')}/api/v1/jenis-service/img-url/`,
+        id_jenis_mitra: 1
       }
     ]
 
