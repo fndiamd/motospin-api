@@ -57,6 +57,8 @@ class MitraOutletController {
                     mitra_status: e.mitra_status,
                     mitra_img_path: e.mitra_img_path,
                     mitra_maps_url: e.mitra_maps_url,
+                    mitra_jam_buka: e.mitra_jam_buka,
+                    mitra_jam_tutup: e.mitra_jam_tutup,
                     jarak: Math.round(this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) * 10) / 10
                 })
                 total++
@@ -106,6 +108,8 @@ class MitraOutletController {
                         mitra_status: e.mitra_status,
                         mitra_img_path: e.mitra_img_path,
                         mitra_maps_url: e.mitra_maps_url,
+                        mitra_jam_buka: e.mitra_jam_buka,
+                        mitra_jam_tutup: e.mitra_jam_tutup,
                         jarak: Math.round(this.distance(e.mitra_lat, e.mitra_long, location.lat, location.long) * 10) / 10
                     })
                 }
@@ -273,7 +277,7 @@ class MitraOutletController {
             }).fetch()
 
             const id_jenis_service = []
-            
+
             serviceOutlet.toJSON().map(e => {
                 id_jenis_service.push(e.id_jenis_service)
             })
@@ -294,15 +298,20 @@ class MitraOutletController {
         }
     }
 
-    async myOutlets({ auth, response, params }) {
+    async myOutlets({ auth, response, request }) {
         try {
-            const page = params.page || 1
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
             const authData = await auth.authenticator('owner').getUser()
             const myOutlets = await MitraOutlet
                 .query()
                 .where({ id_owner: authData.id_owner })
-                .orderBy('updated_at', 'desc')
-                .paginate(page, 5)
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
 
             return response.json(myOutlets)
         } catch (error) {
@@ -315,18 +324,17 @@ class MitraOutletController {
     }
 
     async search({ request, response }) {
-        let keywords = request.only(['mitra_nama', 'id_jenis_mitra'])
-        let query;
-        if (keywords.id_jenis_mitra == null) {
-            query = `mitra_nama LIKE '%${keywords.mitra_nama}%'`
-        } else if (keywords.mitra_nama == null) {
-            query = `id_jenis_mitra = '${keywords.mitra_nama}'`
-        } else {
-            query = `mitra_nama LIKE '%${keywords.mitra_nama}%' AND id_jenis_mitra = ${keywords.id_jenis_mitra}`
-        }
-
         try {
-            const result = await MitraOutlet.query().whereRaw(query).fetch()
+            let keywords = request.only(['mitra_nama', 'id_jenis_mitra'])
+            const result = await MitraOutlet
+                .query()
+                .whereRaw(`id_jenis_mitra = ${keywords.id_jenis_mitra} AND LOWER(mitra_nama) LIKE '%${keywords.mitra_nama}%'`)
+                .fetch()
+
+            if(result.rows.length == 0){
+                return response.status(404).send({ message: `Pencarian untuk ${keywords.mitra_nama} tidak ditemukan` })
+            }
+
             return response.json(result)
         } catch (error) {
             return error.message

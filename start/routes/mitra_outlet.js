@@ -10,7 +10,7 @@ Route.group(() => {
 }).prefix('api/v1/mitra-outlet')
 
 Route.group(() => {
-    Route.get('/my-outlets/:page', 'MitraOutletController.myOutlets')
+    Route.get('/my-outlets', 'MitraOutletController.myOutlets')
     Route.post('/store', 'MitraOutletController.store')
     Route.put('/update/:id', 'MitraOutletController.update')
     Route.delete('/delete/:id', 'MitraOutletController.delete')

@@ -10,6 +10,7 @@ class OrderServiceSchema extends Schema {
       table.datetime('order_tanggal')
       table.string('kendaraan_nopol')
       table.integer('kendaraan_tahun')
+      table.integer('order_status').defaultTo(0)
       table.integer('id_merk_kendaraan')
         .unsigned()
         .references('id_merk_kendaraan')
