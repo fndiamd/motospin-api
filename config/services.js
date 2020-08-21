@@ -15,5 +15,13 @@ module.exports = {
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-3snzi%40motospin-backend.iam.gserviceaccount.com",
         "databaseURL": "https://motospin-backend.firebaseio.com"
+    },
+    ally: {
+        google: {
+            clientId: "503306962797-p4aa0icm5mph8fogavacpvalg65nfrn3.apps.googleusercontent.com",
+            clientSecret: "ytzAcgK78BPECKU-CFjCThYd",
+            redirectUri: "localhost:3333/api/v1/auth/user-authenticated/google/"
+        }
     }
+
 }

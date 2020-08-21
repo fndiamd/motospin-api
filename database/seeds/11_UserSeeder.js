@@ -35,7 +35,7 @@ class UserSeeder {
       },
     ]
 
-    await User.create(data)
+    await User.createMany(data)
   }
 }
 
