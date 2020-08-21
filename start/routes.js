@@ -4,6 +4,7 @@ const { get, route, group } = require('@adonisjs/framework/src/Route/Manager')
 
 const Route = use('Route')
 
+require('./routes/admin')
 require('./routes/user')
 require('./routes/owner')
 require('./routes/pegawai')

@@ -2,6 +2,7 @@
 
 const OrderService = use('App/Models/OrderService')
 const DetailOrder = use('App/Models/DetailOrderService')
+const Firebase = use('Adonis/Services/Firebase')
 
 class OrderServiceController {
 
@@ -186,6 +187,28 @@ class OrderServiceController {
                 error: error.name,
                 message: error.message
             })
+        }
+    }
+
+    async notif({response}) {
+        const notification_options = {
+            priority: "high",
+            contentAvailable: true
+        };
+        const registrationToken = "f7qeq6fESoSvx_J-HVa9BN:APA91bGXX12AexyqVkS0vyt1VEQn9FK08ssrY20IGWpK7rc8OIQtMAXoXX1bvQHG1fw3X2nGS0R4HpUm1ZBmJXkkFTiMAt8OV9ORDcXxsjOpeRuiv8oLu3t-o47uvtcDKBNLlVVVpomT"
+        const message = {
+            notification: {
+                title: 'Tes notif',
+                body: 'kountlo'
+            }
+        }
+        const options = notification_options
+
+        try {
+            Firebase.messaging().sendToDevice(registrationToken, message, options)
+            return response.send('berhasil')
+        } catch (error) {
+            return error.message
         }
     }
 

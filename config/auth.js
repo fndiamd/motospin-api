@@ -123,6 +123,17 @@ module.exports = {
       secret: `${Env.get('APP_KEY')}-mitra_pegawai`,
       expiresIn: 31557600000
     }
+  },
+  admin: {
+    serializer: 'lucid',
+    model: 'App/Models/Admin',
+    scheme: 'jwt',
+    uid: 'admin_email',
+    password: 'admin_password',
+    options: {
+      secret: `${Env.get('APP_KEY')}-admin`,
+      expiresIn: 31557600000
+    }
   }
 
   
