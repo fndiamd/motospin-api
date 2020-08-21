@@ -205,12 +205,13 @@ class OrderServiceController {
             notification: {
                 title: 'Tes notif',
                 body: 'kountlo menyisan data'
-            }
+            },
+            tokens: registrationToken
         }
         const options = notification_options
 
         try {
-            Firebase.messaging().sendToDevice(registrationToken, message, options)
+            Firebase.messaging().sendMulticast(message)
             return response.send('berhasil')
         } catch (error) {
             return error.message
