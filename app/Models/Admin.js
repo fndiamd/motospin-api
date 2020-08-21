@@ -22,6 +22,11 @@ class Admin extends Model {
     tokens(){
         return this.hasMany('App/Models/TokenAdmin')
     }
+
+
+    firebaseTokens(){
+        return this.hasMany('App/Models/FirebaseTokenAdmin')
+    }
 }
 
 module.exports = Admin

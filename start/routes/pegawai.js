@@ -7,6 +7,8 @@ Route.group(() => {
     Route.post('/pegawai-request-code', 'Auth/PegawaiController.requestCode')
     Route.put('/pegawai-update', 'Auth/PegawaiController.update')
     Route.put('/pegawai-change-password', 'Auth/PegawaiController.updatePassword')
+    Route.post('/pegawai-firebase-token', 'Firebase/TokenPegawaiController.store')
+    Route.delete('/pegawai-firebase-token', 'Firebase/TokenPegawaiController.delete')
 }).prefix('api/v1/auth').middleware(['auth:pegawai'])
 
 // Route Middleware Guest

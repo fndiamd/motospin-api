@@ -30,11 +30,15 @@ class MitraOwner extends Model {
         return this.hasMany('App/Models/TokenOwner', 'id_owner', 'owner_id')
     }
 
+    firebaseTokens() {
+        return this.hasMany('App/Models/FirebaseTokenOwner')
+    }
+
     kodeOwner() {
         return this.hasMany('App/Models/KodeOwner')
     }
 
-    outlet(){
+    outlet() {
         return this.hasMany('App/Models/MitraOutlet')
     }
 }

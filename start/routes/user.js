@@ -8,6 +8,8 @@ Route.group(() => {
     Route.post('/user-request-code', 'Auth/UserController.requestCode')
     Route.put('/user-update', 'Auth/UserController.update')
     Route.put('/user-change-password', 'Auth/UserController.updatePassword')
+    Route.post('/user-firebase-token', 'Firebase/TokenUserController.store')
+    Route.delete('/user-firebase-token', 'Firebase/TokenUserController.delete')
 }).prefix('api/v1/auth').middleware(['auth:user'])
 
 // Route Middleware Guest

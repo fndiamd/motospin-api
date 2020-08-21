@@ -74,6 +74,7 @@ class OrderServiceController {
                 order_tanggal: request.input('order_tanggal'),
                 kendaraan_nopol: request.input('kendaraan_nopol'),
                 kendaraan_tahun: request.input('kendaraan_tahun'),
+                kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
                 id_merk_kendaraan: request.input('id_merk_kendaraan'),
                 id_tipe_kendaraan: request.input('id_tipe_kendaraan'),
                 id_user: authData.id_user,
@@ -195,11 +196,15 @@ class OrderServiceController {
             priority: "high",
             contentAvailable: true
         };
-        const registrationToken = "f7qeq6fESoSvx_J-HVa9BN:APA91bGXX12AexyqVkS0vyt1VEQn9FK08ssrY20IGWpK7rc8OIQtMAXoXX1bvQHG1fw3X2nGS0R4HpUm1ZBmJXkkFTiMAt8OV9ORDcXxsjOpeRuiv8oLu3t-o47uvtcDKBNLlVVVpomT"
+        const registrationToken = 
+        [
+            "fPaIBSeESsyOkHwUE5uZ-V:APA91bFZYxCRgPQUf3E9w-gLvFYsOk247wxuUJplEozR-gVF7jTfElE8bG47BDwel1h8QA_wONjHTZrzbbXgeqVMRsj94UGTSYpiLGCQFMC60o2C8sozlLAvUeGVjRilS27kAosGEKLU",
+            "dc5sNUORSyiZc1WljenI0n:APA91bEUrSNbiNjgskxNtQtzWQ-O2PKPhPHwoM4W5AhnFEo-DAZT01Efz3_n7DWGJG5OvAIv07PJH_HLe3fDUR6MSMh7WE9xZ9RBgkd-7QfstnMX-XsBJ9mxRKXoy1_BFnKG3x03Gq_g"
+        ]
         const message = {
             notification: {
                 title: 'Tes notif',
-                body: 'kountlo'
+                body: 'kountlo menyisan data'
             }
         }
         const options = notification_options

@@ -26,6 +26,10 @@ class User extends Model {
     return this.hasMany('App/Models/Token')
   }
 
+  firebaseTokens(){
+    return this.hasMany('App/Models/FirebaseTokenUser')
+  }
+
   kodeUser() {
     return this.hasMany('App/Models/KodeUser')
   }
