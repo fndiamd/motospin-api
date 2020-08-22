@@ -4,6 +4,15 @@ const Token = use('App/Models/FirebaseTokenUser')
 
 class TokenUserController {
 
+    async getToken(){
+        const registerToken = await Token.query().where({ id_user: 1}).fetch()
+        const data = []
+        registerToken.toJSON().map(e => {
+            data.push(e.registration_token)
+        })
+        return data
+    }
+
     async store({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('user').getUser()

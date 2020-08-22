@@ -8,6 +8,7 @@ class OrderProdukSchema extends Schema {
     this.create('order_produks', (table) => {
       table.increments('id_order_produk')
       table.datetime('order_tanggal').notNullable()
+      table.string('order_kode').notNullable()
       table.string('nama_penerima').notNullable()
       table.text('alamat_penerima')
       table.integer('order_total')

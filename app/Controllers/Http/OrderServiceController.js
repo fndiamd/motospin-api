@@ -2,7 +2,7 @@
 
 const OrderService = use('App/Models/OrderService')
 const DetailOrder = use('App/Models/DetailOrderService')
-const Firebase = use('Adonis/Services/Firebase')
+const Event = use('Event')
 
 class OrderServiceController {
 
@@ -58,6 +58,8 @@ class OrderServiceController {
         try {
             const order = await this.createOrder({ request, response, auth })
             const detailOrder = await this.createDetailOrder({ request, response }, order.id_order_service)
+            Event.fire('new::orderService', order)
+
             return response.json({
                 order: order,
                 detailOrder: detailOrder
@@ -70,8 +72,11 @@ class OrderServiceController {
     async createOrder({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('user').getUser()
+            const date = new Date().toJSON().slice(0, 10).replace(/-/g, '')
+            const kode = Math.random().toString(36).substring(7).toUpperCase()
             const dataOrder = {
                 order_tanggal: request.input('order_tanggal'),
+                order_kode: `MSPIN/${date}/SVC/${request.input('id_mitra')}/${kode}`,
                 kendaraan_nopol: request.input('kendaraan_nopol'),
                 kendaraan_tahun: request.input('kendaraan_tahun'),
                 kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
@@ -134,7 +139,13 @@ class OrderServiceController {
             if (!orderData) {
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
-            return response.json({ message: 'Order accepted' })
+
+            const order = await OrderService.query()
+                .where({
+                    id_order_service: params.id,
+                }).with('outlet').first()
+            Event.fire('accept::orderService', order)
+            return response.json({ message: 'Order accepted'})
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -158,6 +169,11 @@ class OrderServiceController {
             if (!orderData) {
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
+            const order = await OrderService.query()
+                .where({
+                    id_order_service: params.id,
+                }).with('outlet').first()
+            Event.fire('decline::orderService', order)
             return response.json({ message: 'Order declined' })
         } catch (error) {
             return response.status(error.status).send({
@@ -182,6 +198,11 @@ class OrderServiceController {
             if (!orderData) {
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
             }
+            const order = await OrderService.query()
+                .where({
+                    id_order_service: params.id,
+                }).with('outlet').first()
+            Event.fire('finish::orderService', order)
             return response.json({ message: 'Order finished' })
         } catch (error) {
             return response.status(error.status).send({
@@ -191,16 +212,16 @@ class OrderServiceController {
         }
     }
 
-    async notif({response}) {
+    async notif({ response }) {
         const notification_options = {
             priority: "high",
             contentAvailable: true
         };
-        const registrationToken = 
-        [
-            "fPaIBSeESsyOkHwUE5uZ-V:APA91bFZYxCRgPQUf3E9w-gLvFYsOk247wxuUJplEozR-gVF7jTfElE8bG47BDwel1h8QA_wONjHTZrzbbXgeqVMRsj94UGTSYpiLGCQFMC60o2C8sozlLAvUeGVjRilS27kAosGEKLU",
-            "dc5sNUORSyiZc1WljenI0n:APA91bEUrSNbiNjgskxNtQtzWQ-O2PKPhPHwoM4W5AhnFEo-DAZT01Efz3_n7DWGJG5OvAIv07PJH_HLe3fDUR6MSMh7WE9xZ9RBgkd-7QfstnMX-XsBJ9mxRKXoy1_BFnKG3x03Gq_g"
-        ]
+        const registrationToken =
+            [
+                "fPaIBSeESsyOkHwUE5uZ-V:APA91bFZYxCRgPQUf3E9w-gLvFYsOk247wxuUJplEozR-gVF7jTfElE8bG47BDwel1h8QA_wONjHTZrzbbXgeqVMRsj94UGTSYpiLGCQFMC60o2C8sozlLAvUeGVjRilS27kAosGEKLU",
+                "dc5sNUORSyiZc1WljenI0n:APA91bEUrSNbiNjgskxNtQtzWQ-O2PKPhPHwoM4W5AhnFEo-DAZT01Efz3_n7DWGJG5OvAIv07PJH_HLe3fDUR6MSMh7WE9xZ9RBgkd-7QfstnMX-XsBJ9mxRKXoy1_BFnKG3x03Gq_g"
+            ]
         const message = {
             notification: {
                 title: 'Tes notif',
@@ -211,7 +232,7 @@ class OrderServiceController {
         const options = notification_options
 
         try {
-            Firebase.messaging().sendMulticast(message)
+            Firebase.messaging().sendToDevice(message)
             return response.send('berhasil')
         } catch (error) {
             return error.message

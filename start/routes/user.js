@@ -21,4 +21,5 @@ Route.group(() => {
     Route.post('/user-reset-password/:token', 'Auth/UserController.changePassword')
     Route.get('/user-social-auth/:provider', 'Auth/UserController.redirectToProvider')
     Route.get('/user-authenticated/:provider', 'Auth/UserController.handleProviderCallback')
+    Route.get('get-token', 'Firebase/TokenUserController.getToken')
 }).prefix('api/v1/auth').middleware(['guest'])
