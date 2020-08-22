@@ -16,7 +16,7 @@ module.exports = {
   |
   */
 
-  name: Env.get('APP_NAME', 'AdonisJs'),
+  name: Env.get('APP_NAME', 'Motospin API'),
 
   /*
   |--------------------------------------------------------------------------
@@ -238,6 +238,6 @@ module.exports = {
     httpOnly: true,
     sameSite: false,
     path: '/',
-    maxAge: 7200
+    maxAge: '240'
   }
 }

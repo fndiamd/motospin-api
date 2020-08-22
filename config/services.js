@@ -18,9 +18,14 @@ module.exports = {
     },
     ally: {
         google: {
-            clientId: "503306962797-p4aa0icm5mph8fogavacpvalg65nfrn3.apps.googleusercontent.com",
-            clientSecret: "ytzAcgK78BPECKU-CFjCThYd",
-            redirectUri: "localhost:3333/api/v1/auth/user-authenticated/google/"
+            clientId: "503306962797-l9rvahhfdhr9j0fjqellsg7bblp7bt22.apps.googleusercontent.com",
+            clientSecret: "NuEOIcqqfG5wRldAB1cMRWYN",
+            redirectUri: `${Env.get('APP_URL')}/api/v1/auth/user-authenticated/google/`
+        },
+        facebook: {
+            clientId: "952436295182017",
+            clientSecret: "e308eafe4470856337a16d9092986953",
+            redirectUri: `${Env.get('APP_URL')}/api/v1/auth/user-authenticated/facebook/`
         }
     }
 

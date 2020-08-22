@@ -96,11 +96,11 @@ class UserController {
                 "access_token": authentication
             })
         } catch (error) {
-            if(error.name === 'PasswordMisMatchException'){
+            if (error.name === 'PasswordMisMatchException') {
                 return response.status(401).send({ message: 'Password salah! Cek kembali password anda' })
             }
 
-            if(error.name === 'ModelNotFoundException'){
+            if (error.name === 'ModelNotFoundException') {
                 return response.status(404).send({ message: 'User tidak terdaftar!' })
             }
             return response.status(error.status).send({
@@ -254,14 +254,14 @@ class UserController {
 
     async viewChangePassword({ params, view, response }) {
         const thisToken = await UserToken.findBy('token', params.token)
-        if(thisToken){
+        if (thisToken) {
             return view.render('change-password')
-        }else{
+        } else {
             return view.render('404')
         }
     }
 
-    async update({ auth, request, response }){
+    async update({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const thisUser = await User.findOrFail(authData.id_user)
@@ -278,61 +278,84 @@ class UserController {
             await thisUser.save()
             return response.json(thisUser)
         } catch (error) {
-            if(error.name === 'ModelNotFoundException'){
-                return response.json({ message: 'User tidak ditemukan'})
+            if (error.name === 'ModelNotFoundException') {
+                return response.json({ message: 'User tidak ditemukan' })
             }
             return error.message
         }
     }
 
-    async updatePassword({ auth, request, response }){
+    async updatePassword({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const thisUser = await User.findOrFail(authData.id_user)
 
-            if(request.input('new_password') === request.input('confirm_password')){
+            if (request.input('new_password') === request.input('confirm_password')) {
                 thisUser.user_password = request.input('new_password')
                 await thisUser.save()
-                return response.json({ message: 'success'})
-            }else{
+                return response.json({ message: 'success' })
+            } else {
                 return response.json({ message: 'Confirm password does\'t match' })
             }
         } catch (error) {
-            if(error.name === 'ModelNotFoundException'){
-                return response.json({ message: 'User tidak ditemukan'})
+            if (error.name === 'ModelNotFoundException') {
+                return response.json({ message: 'User tidak ditemukan' })
             }
             return error.message
         }
     }
 
-    async handleProviderCallback ({params, ally, auth, response}) {
-        const provider = params.provider
+    async redirectToProvider({ ally, params }) {
         try {
+            await ally.driver(params.provider).redirect()
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async handleProviderCallback({ params, ally, auth, response }) {
+        
+        try {
+            const provider = params.provider
             const userData = await ally.driver(provider).getUser()
 
-            // const authUser = await User.query().where({
-            //     'provider': provider,
-            //     'provider_id': userData.getId()
-            // }).first()
+            const thisUser = await User.query().where({
+                'provider': provider,
+                'provider_id': userData.getId()
+            }).first()
 
-            return userData
-            // if (!(authUser === null)) {
-            //     await auth.loginViaId(authUser.id)
-            //     return response.redirect('/')
-            // }
+            if (thisUser) {
+                try {
+                    const token = await auth.authenticator('user').withRefreshToken().generate(thisUser)
+                    return response.json({
+                        user: thisUser,
+                        accessToken: token
+                    })    
+                } catch (error) {
+                    return error.message
+                }
+                
+            } else {
+                const data = {
+                    user_nama: userData.getName(),
+                    user_email: userData.getEmail(),
+                    provider_id: userData.getId(),
+                    user_avatar_path: userData.getAvatar(),
+                    provider: provider,
+                    user_level: 0
+                }
 
-            // const user = new User()
-            // user.name = userData.getName()
-            // user.username = userData.getNickname()
-            // user.email = userData.getEmail()
-            // user.provider_id = userData.getId()
-            // user.avatar = userData.getAvatar()
-            // user.provider = provider
+                const user = await User.create(data)   
+                const token = await auth.authenticator('user').withRefreshToken().generate(user)
+                return response.json({
+                    user: user,
+                    accessToken: token
+                })
+            }
 
-            // await user.save()
-
-            // await auth.loginViaId(user.id)
-            // return response.redirect('/')
         } catch (e) {
             return response.status(e.status).send({
                 error: e.name,

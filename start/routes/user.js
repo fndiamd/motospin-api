@@ -19,5 +19,6 @@ Route.group(() => {
     Route.post('/user-request-password', 'Auth/UserController.forgotPassword')
     Route.get('/user-reset-password/:token', 'Auth/UserController.viewChangePassword')
     Route.post('/user-reset-password/:token', 'Auth/UserController.changePassword')
+    Route.get('/user-social-auth/:provider', 'Auth/UserController.redirectToProvider')
     Route.get('/user-authenticated/:provider', 'Auth/UserController.handleProviderCallback')
 }).prefix('api/v1/auth').middleware(['guest'])
