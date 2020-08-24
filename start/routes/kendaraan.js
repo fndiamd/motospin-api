@@ -8,4 +8,4 @@ Route.group(() => {
     Route.delete('delete/:id', 'KendaraanController.delete')
     Route.post('change-primary/:id', 'KendaraanController.swapPrimaryCar')
     Route.get('primary-car', 'KendaraanController.getPrimaryCar')
-}).prefix('api/v1/kendaraan').middleware(['auth:user'])
+}).prefix('api/v1/kendaraan').middleware(['auth:user,admin'])

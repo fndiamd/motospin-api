@@ -14,4 +14,4 @@ Route.group(() => {
     Route.post('/store', 'MitraOutletController.store')
     Route.put('/update/:id', 'MitraOutletController.update')
     Route.delete('/delete/:id', 'MitraOutletController.delete')
-}).prefix('api/v1/mitra-outlet').middleware(['auth:owner'])
+}).prefix('api/v1/mitra-outlet').middleware(['auth:owner,admin'])
