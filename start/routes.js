@@ -21,6 +21,7 @@ require('./routes/jenis_service')
 require('./routes/service_bengkel')
 require('./routes/order_service')
 require('./routes/cart')
+require('./routes/order_produk')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

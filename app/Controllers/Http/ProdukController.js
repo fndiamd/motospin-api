@@ -181,6 +181,7 @@ class ProdukController {
                 produk_stok: request.input('produk_stok'),
                 produk_harga: request.input('produk_harga'),
                 produk_berat: request.input('produk_berat'),
+                produk_deskripsi: request.input('produk_deskripsi'),
                 id_mitra: request.input('id_mitra'),
                 id_kategori_produk: request.input('id_kategori_produk'),
                 id_merk_produk: request.input('id_merk_produk')
@@ -296,11 +297,9 @@ class ProdukController {
     }
 
     async updateProductPicture() {
-
     }
 
     async updateCompatibleProduct() {
-
     }
 
 

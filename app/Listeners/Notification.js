@@ -2,9 +2,9 @@
 
 const Firebase = use('Adonis/Services/Firebase')
 const Token = use('App/Models/FirebaseTokenUser')
-const OrderService = exports = module.exports = {}
+const Notification = exports = module.exports = {}
 
-OrderService.created = async (order) => {
+Notification.createdOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
@@ -36,21 +36,18 @@ OrderService.created = async (order) => {
 
     try {
         Firebase.messaging().sendMulticast(message)
-        return response.send('berhasil')
     } catch (error) {
         return error.message
     }
 }
 
-OrderService.accept = async (order) => {
+Notification.acceptOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
     getToken.toJSON().map(e => {
         registrationToken.push(e.registration_token)
     })
-
-    console.log(order.id_user);
 
     const message = {
         notification: {
@@ -76,21 +73,18 @@ OrderService.accept = async (order) => {
 
     try {
         Firebase.messaging().sendMulticast(message)
-        return response.send('berhasil')
     } catch (error) {
         return error.message
     }
 }
 
-OrderService.decline = async (order) => {
+Notification.declineOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
     getToken.toJSON().map(e => {
         registrationToken.push(e.registration_token)
     })
-
-    console.log(order.id_user);
 
     const message = {
         notification: {
@@ -116,21 +110,18 @@ OrderService.decline = async (order) => {
 
     try {
         Firebase.messaging().sendMulticast(message)
-        return response.send('berhasil')
     } catch (error) {
         return error.message
     }
 }
 
-OrderService.finish = async (order) => {
+Notification.finishOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
     getToken.toJSON().map(e => {
         registrationToken.push(e.registration_token)
     })
-
-    console.log(order.id_user);
 
     const message = {
         notification: {
@@ -156,7 +147,56 @@ OrderService.finish = async (order) => {
 
     try {
         Firebase.messaging().sendMulticast(message)
-        return response.send('berhasil')
+    } catch (error) {
+        return error.message
+    }
+}
+
+Notification.createdOrderProduk = async (order) => {
+    const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    let data = {}
+    if (order.order_delivery) {
+        data = {
+            title: 'Checkout Sparepart Berhasil',
+            body: `Segera selesaikan pembayaran agar sparepart segera diproses oleh bengkel`
+        }
+    } else {
+        data = {
+            title: 'Checkout Sparepart Berhasil',
+            body: `Anda bisa mengambil sparepart setelah bengkel sudah siap`
+        }
+    }
+
+    const message = {
+        notification: {
+            title: `${data.title}`,
+            body: `${data.body}`
+        },
+        data: {
+            notification_type: 'order-service',
+            id_order_service: `${order.id_order_service}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: `${data.title}`,
+                body: `${data.body}`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
     } catch (error) {
         return error.message
     }

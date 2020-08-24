@@ -3,14 +3,14 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class DetailOrderSparepart extends Model {
+class DetailOrderProduk extends Model {
 
     static get primaryKey(){
-        return 'id_order_detail'
+        return 'id_detail_order_produk'
     }
 
     order(){
-        return this.belongsTo('App/Models/OrderSparepart')
+        return this.belongsTo('App/Models/OrderProduk')
     }
 
     produk(){
@@ -19,4 +19,4 @@ class DetailOrderSparepart extends Model {
 
 }
 
-module.exports = DetailOrderSparepart
+module.exports = DetailOrderProduk
