@@ -238,33 +238,6 @@ class OrderServiceController {
         }
     }
 
-    async notif({ response }) {
-        const notification_options = {
-            priority: "high",
-            contentAvailable: true
-        };
-        const registrationToken =
-            [
-                "fPaIBSeESsyOkHwUE5uZ-V:APA91bFZYxCRgPQUf3E9w-gLvFYsOk247wxuUJplEozR-gVF7jTfElE8bG47BDwel1h8QA_wONjHTZrzbbXgeqVMRsj94UGTSYpiLGCQFMC60o2C8sozlLAvUeGVjRilS27kAosGEKLU",
-                "dc5sNUORSyiZc1WljenI0n:APA91bEUrSNbiNjgskxNtQtzWQ-O2PKPhPHwoM4W5AhnFEo-DAZT01Efz3_n7DWGJG5OvAIv07PJH_HLe3fDUR6MSMh7WE9xZ9RBgkd-7QfstnMX-XsBJ9mxRKXoy1_BFnKG3x03Gq_g"
-            ]
-        const message = {
-            notification: {
-                title: 'Tes notif',
-                body: 'kountlo menyisan data'
-            },
-            tokens: registrationToken
-        }
-        const options = notification_options
-
-        try {
-            Firebase.messaging().sendToDevice(message)
-            return response.send('berhasil')
-        } catch (error) {
-            return error.message
-        }
-    }
-
 }
 
 module.exports = OrderServiceController

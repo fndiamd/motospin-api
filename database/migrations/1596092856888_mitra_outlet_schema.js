@@ -4,7 +4,7 @@
 const Schema = use('Schema')
 
 class MitraOutletSchema extends Schema {
-  up () {
+  up() {
     this.create('mitra_outlets', (table) => {
       table.increments('id_mitra')
       table.string('mitra_nama', 150).notNullable()
@@ -12,11 +12,16 @@ class MitraOutletSchema extends Schema {
       table.text('mitra_alamat').notNullable()
       table.string('mitra_long', 50).notNullable()
       table.string('mitra_lat', 50).notNullable()
-      table.string('mitra_maps_url')
       table.string('mitra_img_path', 200)
       table.integer('mitra_status').defaultTo(1)
       table.time('mitra_jam_buka').notNullable()
       table.time('mitra_jam_tutup').notNullable()
+      table.integer('city_id').nullable()
+      table.integer('province_id').nullable()
+      table.string('province').nullable()
+      table.string('type').nullable()
+      table.string('city_name').nullable()
+      table.string('postal_code').nullable()
       table.integer('id_jenis_mitra')
         .unsigned()
         .references('id_jenis_mitra')
@@ -32,7 +37,7 @@ class MitraOutletSchema extends Schema {
     })
   }
 
-  down () {
+  down() {
     this.drop('mitra_outlets')
   }
 }

@@ -22,12 +22,12 @@ require('./routes/service_bengkel')
 require('./routes/order_service')
 require('./routes/cart')
 require('./routes/order_produk')
+require('./routes/raja_ongkir')
+require('./routes/alamat_user')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }
 })
-
-Route.post('notif', 'OrderServiceController.notif')
 
 
 
