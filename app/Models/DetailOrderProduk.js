@@ -14,7 +14,7 @@ class DetailOrderProduk extends Model {
     }
 
     produk(){
-        return this.belongsTo('App/Models/Produk')
+        return this.belongsTo('App/Models/Produk', 'id_produk', 'id_produk')
     }
 
 }
