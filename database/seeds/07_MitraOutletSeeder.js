@@ -29,7 +29,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '08:00:00',
         mitra_jam_tutup: '17:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Bengkel Mobil SJM',
@@ -42,7 +48,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '07:30:00',
         mitra_jam_tutup: '17:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Grand Speed Bengkel Mobil',
@@ -55,7 +67,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '00:00:00',
         mitra_jam_tutup: '23:59:59',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Iwan Bengkel Mobil',
@@ -68,7 +86,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '09:00:00',
         mitra_jam_tutup: '17:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Bengkel Harvest Autocar',
@@ -81,7 +105,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '08:30:00',
         mitra_jam_tutup: '18:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Bengkel Mobil Aji Motor',
@@ -94,7 +124,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '08:00:00',
         mitra_jam_tutup: '17:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Bengkel Mobil Surabaya TOP SEVEN GARAGE',
@@ -107,7 +143,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '09:00:00',
         mitra_jam_tutup: '22:30:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Bengkel AW',
@@ -120,7 +162,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '08:00:00',
         mitra_jam_tutup: '17:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       },
       {
         mitra_nama: 'Bengkel Cak Gatot',
@@ -133,7 +181,13 @@ class MitraOutletSeeder {
         mitra_jam_buka: '08:00:00',
         mitra_jam_tutup: '17:00:00',
         id_jenis_mitra: 1,
-        id_owner: 1
+        id_owner: 1,
+        city_id: 444,
+        province_id: 11,
+        province: 'Jawa Timur',
+        type: 'Kota',
+        city_name: 'Surabaya',
+        postal_code: 60119
       }
     ]
 

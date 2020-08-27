@@ -1,8 +1,12 @@
 'use strict'
 
-const OrderProduk = use('App/Models/OrderProduk')
-const DetailOrderProduk = use('App/Models/DetailOrderProduk')
-const Event = use('Event')
+const { auth } = require("firebase-admin")
+
+const Order = use('App/Models/OrderProduk')
+const DetailOrder = use('App/Models/DetailOrderProduk')
+const Ekspedisi = use('App/Models/PengirimanProduk')
+
+const moment = use('moment')
 
 class OrderProdukController {
 
@@ -15,10 +19,12 @@ class OrderProdukController {
             const sort = pagination.sort || 'desc'
 
             const authData = await auth.authenticator('user').getUser()
-            const result = await OrderProduk
+            const result = await Order
                 .query()
                 .with('outlet')
                 .with('detailOrder.produk')
+                .with('payment')
+                .with('ekspedisi')
                 .where({ id_user: authData.id_user, order_status: request.input('status') })
                 .orderBy(`${column}`, `${sort}`)
                 .paginate(page, limit)
@@ -31,52 +37,68 @@ class OrderProdukController {
     async store({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('user').getUser()
-            const produk = request.input('produkCart')
+            const req = request.all()
 
-            let total = 0;
-            produk.map(e => {
-                total += e.produk.produk_harga * e.jumlah
-            })
-            
             const date = new Date().toJSON().slice(0, 10).replace(/-/g, '')
             const kode = Math.random().toString(36).substring(7).toUpperCase()
 
-            const data = {
-                order_tanggal: request.input('order_tanggal'),
-                order_kode: `MSPIN/${date}/SPR/${request.input('id_mitra')}/${kode}`,
-                nama_penerima: request.input('nama_penerima'),
-                alamat_penerima: request.input('alamat_penerima'),
-                order_total: total,
-                order_status: 0,
-                order_delivery: request.input('order_delivery'),
+            const order = await Order.create({
+                order_tanggal: moment().format('Y-MM-DD HH:mm:ss Z'),
+                order_kode: `MSPIN${date}SPR${req.id_mitra}${kode}`,
+                nama_penerima: req.nama_penerima,
+                alamat_penerima: req.alamat_penerima.alamat,
+                order_delivery: req.order_delivery,
                 id_user: authData.id_user,
-                id_mitra: request.input('id_mitra')
-            }
+                id_mitra: req.id_mitra
+            })
 
-            const order = await OrderProduk.create(data)
-            const dataDetail = []
-            produk.map(e => {
-                dataDetail.push({
-                    id_order_produk: order.id_order_produk,
-                    id_produk: e.id_produk,
-                    jumlah: e.jumlah,
-                    harga_satuan: e.produk.produk_harga
+            const orderProduk = []
+            req.produkCart.map(item => {
+                orderProduk.push({
+                    id_order_produk: 1,
+                    id_produk: item.id_produk,
+                    jumlah: item.jumlah,
+                    harga_satuan: item.produk.produk_harga,
+                    id_order_produk: order.id_order_produk
                 })
             })
 
-            Event.fire('new::orderProduk', order)
-
-            const detailOrder = await DetailOrderProduk.createMany(dataDetail)
+            const detailOrder = await DetailOrder.createMany(orderProduk)
+            const ekspedisi = await Ekspedisi.create({
+                courier: req.ekspedisi.courier,
+                courier_service: req.ekspedisi.courier_service,
+                courier_cost: req.ekspedisi.courier_cost,
+                courier_etd: req.ekspedisi.courier_etd,
+                id_order_produk: order.id_order_produk
+            })
             return response.json({
                 order: order,
-                detailOrder: detailOrder
+                detail: detailOrder,
+                ekspedisi: ekspedisi
             })
         } catch (error) {
             return error.message
         }
     }
 
-
+    async delete({ auth, request, response, params }) {
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            const checkData = await Order.query()
+                .where({ id_user: authData.id_user, id_order_produk: params.id }).first()
+            if (!checkData)
+                return response.status(404).send({ message: 'Data tidak ditemukan' })
+            
+            const thisData = await Order.find(params.id)
+            await thisData.delete()
+            return response.json({ message: 'Order berhasil dihapus' })
+        } catch (error) {
+            return response.status(error).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
 
 }
 

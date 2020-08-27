@@ -7,3 +7,5 @@ Event.on('finish::orderService', 'Notification.finishOrderService')
 
 Event.on('new::orderProduk', 'Notification.createdOrderProduk')
 
+Event.on('request::paymentProduk', 'Notification.requestPaymentProduk')
+

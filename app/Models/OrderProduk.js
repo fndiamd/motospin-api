@@ -21,6 +21,14 @@ class OrderProduk extends Model {
         this.hasMany('App/Model/DetailOrderSparepart')
     }
 
+    payment(){
+        this.hasOne('App/Models/PaymentProduk')
+    }
+
+    ekspedisi(){
+        this.hasOne('App/Models/PengirimanProduk')
+    }
+
 }
 
 module.exports = OrderProduk

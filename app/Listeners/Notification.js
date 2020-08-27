@@ -201,3 +201,45 @@ Notification.createdOrderProduk = async (order) => {
         return error.message
     }
 }
+
+Notification.requestPaymentProduk = async (order) => {
+    const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    const data = {
+        title: 'Checkout Sparepart Berhasil',
+        body: `Segera selesaikan pembayaran agar sparepart segera diproses oleh bengkel`
+    }
+
+    const message = {
+        notification: {
+            title: `${data.title}`,
+            body: `${data.body}`
+        },
+        data: {
+            notification_type: 'order-produk',
+            id_order_produk: `${order.id_order_produk}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: `${data.title}`,
+                body: `${data.body}`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
+    } catch (error) {
+        return error.message
+    }
+}

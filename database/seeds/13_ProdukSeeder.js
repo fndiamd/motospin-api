@@ -18,9 +18,12 @@ class ProdukSeeder {
     const data = [
       {
         produk_nama: "",
-        produk_stok: 0,
-        produk_harga: 0,
-        produk_berat: 1,
+        produk_stok: 10,
+        produk_harga: 12000000,
+        produk_berat: 4,
+        produk_deskripsi: "",
+        id_kategori_produk: 0,
+        id_merk_produk: 0,
         id_mitra: 9
       }
     ]

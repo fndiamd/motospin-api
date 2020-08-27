@@ -77,7 +77,7 @@ class OrderServiceController {
             const kode = Math.random().toString(36).substring(7).toUpperCase()
             const dataOrder = {
                 order_tanggal: request.input('order_tanggal'),
-                order_kode: `MSPIN/${date}/SVC/${request.input('id_mitra')}/${kode}`,
+                order_kode: `MSPIN${date}SVC${request.input('id_mitra')}${kode}`,
                 kendaraan_nopol: request.input('kendaraan_nopol'),
                 kendaraan_tahun: request.input('kendaraan_tahun'),
                 kendaraan_no_rangka: request.input('kendaraan_no_rangka'),
