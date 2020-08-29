@@ -120,7 +120,7 @@ class PaymentProdukController {
                 
             }
         })
-
+        Event.fire('pending::paymentProduk', checkOrder)
         payment.payment_detail = JSON.stringify(data)
         await payment.save()
         return payment
@@ -133,7 +133,15 @@ class PaymentProdukController {
             switch(requestData.transaction_status){
                 case 'pending':
                     order.order_status = 1
-                    Event.fire('request::paymentProduk', order)
+                    Event.fire('pending::paymentProduk', order)
+                    break;
+                case 'cancel': 
+                    order.order_status = -1
+                    Event.fire('cancel::paymentProduk', order)
+                    break;
+                case 'settlement':
+                    order.order_status = 2
+                    Event.fire('settlement::paymentProduk', order)
                     break;
             }
 

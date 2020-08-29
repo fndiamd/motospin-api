@@ -202,7 +202,7 @@ Notification.createdOrderProduk = async (order) => {
     }
 }
 
-Notification.requestPaymentProduk = async (order) => {
+Notification.pendingPaymentProduk = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
@@ -243,3 +243,88 @@ Notification.requestPaymentProduk = async (order) => {
         return error.message
     }
 }
+
+Notification.cancelPaymentProduk = async (order) => {
+    const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    const data = {
+        title: 'Pesanan dibatalkan',
+        body: `Pesanan dengan nomor ${order.order_kode} telah dibatalkan, lihat detailnya`
+    }
+
+    const message = {
+        notification: {
+            title: `${data.title}`,
+            body: `${data.body}`
+        },
+        data: {
+            notification_type: 'order-produk',
+            id_order_produk: `${order.id_order_produk}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: `${data.title}`,
+                body: `${data.body}`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
+    } catch (error) {
+        return error.message
+    }
+}
+
+Notification.settlementPaymentProduk = async (order) => {
+    const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    const data = {
+        title: 'Pembayaran berhasil',
+        body: `Pembayaran untuk pesanan ${order.order_kode} telah berhasil`
+    }
+
+    const message = {
+        notification: {
+            title: `${data.title}`,
+            body: `${data.body}`
+        },
+        data: {
+            notification_type: 'order-produk',
+            id_order_produk: `${order.id_order_produk}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: `${data.title}`,
+                body: `${data.body}`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
+    } catch (error) {
+        return error.message
+    }
+}
+

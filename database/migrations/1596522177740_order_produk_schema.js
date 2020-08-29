@@ -13,6 +13,7 @@ class OrderProdukSchema extends Schema {
       table.text('alamat_penerima')
       table.integer('order_status').defaultTo(0)
       table.boolean('order_delivery').defaultTo(true)
+      table.text('order_cancel_description').nullable()
       table.integer('id_user')
         .unsigned()
         .references('id_user')

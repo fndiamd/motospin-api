@@ -88,10 +88,63 @@ class OrderProdukController {
                 .where({ id_user: authData.id_user, id_order_produk: params.id }).first()
             if (!checkData)
                 return response.status(404).send({ message: 'Data tidak ditemukan' })
-            
+
             const thisData = await Order.find(params.id)
             await thisData.delete()
             return response.json({ message: 'Order berhasil dihapus' })
+        } catch (error) {
+            return response.status(error).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async userCancelOrder({ auth, request, response }) {
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            const checkOrder = await Order.query().where({
+                id_user: authData.id_user,
+                id_order_produk: request.input('id_order_produk'),
+                order_status: 0
+            }).first()
+            if (!checkOrder)
+                return response.status(404).send({ message: 'Order tidak ditemukan' })
+
+            await Order.query().where({
+                id_user: authData.id_user,
+                id_order_produk: request.input('id_order_produk')
+            }).update({
+                order_status: -1,
+                order_cancel_description: request.input('order_cancel_description')
+            })
+            return response.json({ message: 'Order berhasil dibatalkan' })
+        } catch (error) {
+            return response.status(error).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async outletCancelOrder({ request, response }) {
+        try {
+            const checkOrder = await Order.query().where({
+                id_mitra: request.input('id_mitra'),
+                id_order_produk: request.input('id_order_produk'),
+                order_status: 0
+            }).first()
+            if (!checkOrder)
+                return response.status(404).send({ message: 'Order tidak ditemukan' })
+
+            await Order.query().where({
+                id_mitra: request.input('id_mitra'),
+                id_order_produk: request.input('id_order_produk')
+            }).update({
+                order_status: -2,
+                order_cancel_description: request.input('order_cancel_description')
+            })
+            return response.json({ message: 'Order berhasil dibatalkan' })
         } catch (error) {
             return response.status(error).send({
                 error: error.name,

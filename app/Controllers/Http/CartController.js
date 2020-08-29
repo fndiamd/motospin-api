@@ -21,7 +21,10 @@ class CartController {
     async index({ auth, response }) {
         try {
             const authData = await auth.authenticator('user').getUser()
-            const result = await Cart.query().with('produk').where({ id_user: authData.id_user }).fetch()
+            const result = await Cart.query()
+                .with('produk.outlet')
+                .with('produk.gambar')
+                .where({ id_user: authData.id_user }).fetch()
 
             const group = await this.groupItemBy(result.toJSON(), 'produk.id_mitra');
             return response.json(group)
