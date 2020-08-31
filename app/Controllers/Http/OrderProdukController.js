@@ -5,6 +5,7 @@ const { auth } = require("firebase-admin")
 const Order = use('App/Models/OrderProduk')
 const DetailOrder = use('App/Models/DetailOrderProduk')
 const Ekspedisi = use('App/Models/PengirimanProduk')
+const Cart = use('App/Models/KeranjangProduk')
 
 const moment = use('moment')
 
@@ -30,7 +31,36 @@ class OrderProdukController {
                 .paginate(page, limit)
             return response.json(result)
         } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
 
+    async outletOrder({ request, response }){
+        try {
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
+            const result = await Order
+                .query()
+                .with('outlet')
+                .with('detailOrder.produk')
+                .with('payment')
+                .with('ekspedisi')
+                .where({ id_mitra: request.input('id_mitra'), order_status: request.input('status') })
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
         }
     }
 
@@ -53,9 +83,11 @@ class OrderProdukController {
             })
 
             const orderProduk = []
+            const idKeranjang = []
             req.produkCart.map(item => {
+                if(item.id_keranjang_produk)
+                    idKeranjang.push(item.id_keranjang_produk)
                 orderProduk.push({
-                    id_order_produk: 1,
                     id_produk: item.id_produk,
                     jumlah: item.jumlah,
                     harga_satuan: item.produk.produk_harga,
@@ -63,6 +95,8 @@ class OrderProdukController {
                 })
             })
 
+            if(!idKeranjang)
+                await Cart.query().whereIn('id_keranjang_produk', idKeranjang).delete()
             const detailOrder = await DetailOrder.createMany(orderProduk)
             const ekspedisi = await Ekspedisi.create({
                 courier: req.ekspedisi.courier,

@@ -73,25 +73,26 @@ class ProdukController {
         }
     }
 
-    async update({ request, response, params }) {
+    async update({ auth, request, response, params }) {
         try {
-            const dataUpdate = {
-                produk_nama: request.input('produk_nama'),
-                produk_stok: request.input('produk_stok'),
-                produk_harga: request.input('produk_harga'),
-                produk_berat: request.input('produk_berat')
-            }
+            // const dataUpdate = {
+            //     produk_nama: request.input('produk_nama'),
+            //     produk_stok: request.input('produk_stok'),
+            //     produk_harga: request.input('produk_harga'),
+            //     produk_berat: request.input('produk_berat')
+            // }
 
-            const updating = await Produk.query()
-                .where({
-                    id_produk: params.id,
-                    id_mitra: request.input('id_mitra')
-                }).update(dataUpdate)
-            if (updating) {
-                return await Produk.find(params.id)
-            } else {
-                return response.status(404).send({ message: 'Data tidak ditemukan' })
-            }
+            // const updating = await Produk.query()
+            //     .where({
+            //         id_produk: params.id,
+            //         id_mitra: request.input('id_mitra')
+            //     }).update(dataUpdate)
+            // if (updating) {
+            //     return await Produk.find(params.id)
+            // } else {
+            //     return response.status(404).send({ message: 'Data tidak ditemukan' })
+            // }
+            return await this.updateProductPicture()
 
         } catch (error) {
             return response.status(error.status).send({
@@ -125,11 +126,27 @@ class ProdukController {
 
     }
 
-    async search(request, response) {
-        const keywords = request.only(['id_merk', 'id_kategori', 'produk_nama'])
+    async searchName({ request, response }) {
+        try {
+            const keywords = request.input('produk_nama').toLowerCase()
+            const result = await Produk
+                .query()
+                .whereRaw(`LOWER(produk_nama) LIKE '%${keywords}%'`)
+                .fetch()
+            if (result.rows.length == 0) {
+                return response.status(404).send({ message: `Pencarian untuk ${keywords} tidak ditemukan` })
+            }
+
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
     }
 
-    async ownProduk({ request, response }) {
+    async produkOutlet({ request, response }) {
         try {
             const pagination = request.only(['page', 'limit', 'column', 'sort'])
             let page = pagination.page || 1
@@ -207,7 +224,7 @@ class ProdukController {
 
             await imgProduct.moveAll(Helpers.publicPath('uploads/produk'), (file) => {
                 return {
-                    name: `${id_produk}-${file.clientName}`
+                    name: `${id_produk}${new Date().getTime()}.${file.subtype}`
                 }
             })
 
@@ -275,19 +292,35 @@ class ProdukController {
 
     async updateProduct({ request, response, params }) {
         try {
+            const thisData = await Produk.findOrFail(params.id)
             const data = {
                 produk_nama: request.input('produk_nama'),
                 produk_stok: request.input('produk_stok'),
                 produk_harga: request.input('produk_harga'),
                 produk_berat: request.input('produk_berat'),
+                produk_deskripsi: request.input('produk_deskripsi'),
                 id_mitra: request.input('id_mitra'),
                 id_kategori_produk: request.input('id_kategori_produk'),
                 id_merk_produk: request.input('id_merk_produk')
             }
 
-            const produk = await Produk.create(data)
-            return produk
+            thisData.produk_nama = data.produk_nama
+            thisData.produk_stok = data.produk_stok
+            thisData.produk_harga = data.produk_harga
+            thisData.produk_berat = data.produk_berat
+            thisData.produk_deskripsi = data.produk_deskripsi
+            thisData.id_mitra = data.id_mitra
+            thisData.id_kategori_produk = data.id_kategori_produk
+            thisData.id_merk_produk = data.id_merk_produk
+            await thisData.save()
+
+            return thisData
         } catch (error) {
+            if (error.name === 'ModelNotFoundException') {
+                return response.status(404).send({
+                    message: 'Data tidak ditemukan'
+                })
+            }
             return response.status(error.status).send({
                 sector: 'Produk',
                 error: error.name,
@@ -296,7 +329,50 @@ class ProdukController {
         }
     }
 
-    async updateProductPicture() {
+    async updateProductPicture({ request, response }, id_produk) {
+        try {
+            const imgProduct = request.file('img_produk', {
+                types: ['image', 'jpg', 'png', 'jpeg'],
+                size: '2mb'
+            })
+
+            await imgProduct.moveAll(Helpers.publicPath('uploads/produk'), (file) => {
+                return {
+                    name: `${id_produk}${new Date().getTime()}.${file.subtype}`
+                }
+            })
+
+            const fs = Helpers.promisify(require('fs'))
+            const removeFile = Helpers.promisify(fs.unlink)
+            const movedFiles = imgProduct.movedList()
+
+            if (!imgProduct.movedAll()) {
+
+                await Promise.all(movedFiles.map((file) => {
+                    return removeFile(path.join(file._location, file.fileName))
+                }))
+
+                return imgProduct.errors()
+            }
+
+            const gambars = []
+
+            await Promise.all(movedFiles.map((file) => {
+                gambars.push({
+                    id_produk: id_produk,
+                    gambar_url_path: `${Env.get('APP_URL')}/api/v1/gambar-produk/img-url/${id_produk}/${file.fileName}`
+                })
+            }))
+
+            // const gambarProduk = await GambarProduk.createMany(gambars)
+            // return gambarProduk
+        } catch (error) {
+            return response.status(error.status).send({
+                sector: 'Gambar Produk',
+                error: error.name,
+                message: error.message
+            })
+        }
     }
 
     async updateCompatibleProduct() {

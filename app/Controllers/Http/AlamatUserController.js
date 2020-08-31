@@ -17,7 +17,7 @@ class AlamatUserController {
         }
     }
 
-    async view({ params, auth }) {
+    async view({ response, params, auth }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const thisData = await Alamat
@@ -107,6 +107,7 @@ class AlamatUserController {
 
     async delete({ params, auth, response }) {
         try {
+            const authData = await auth.authenticator('user').getUser()
             const thisData = await Alamat
                 .query().where({ id_user: authData.id_user, id: params.id }).first()
 
@@ -114,11 +115,24 @@ class AlamatUserController {
                 return response.status(404).send({
                     message: 'Data tidak ditemukan'
                 })
-            } else {
-                const alamat = await Alamat.find(params.id)
-                await alamat.delete()
-                return response.json({ message: 'Alamat berhasil dihapus' })
             }
+
+            const alamat = await Alamat.find(params.id)
+            await alamat.delete()
+            return response.json({ message: 'Alamat berhasil dihapus' })
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async getPrimary({ auth, response }){
+        try {
+            const authData = await auth.authenticator('user').getUser()
+            const result = await Alamat.query().where({ id_user: authData.id_user, primary: true }).first()
+            return response.json(result)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,

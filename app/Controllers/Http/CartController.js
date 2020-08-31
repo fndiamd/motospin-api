@@ -24,6 +24,7 @@ class CartController {
             const result = await Cart.query()
                 .with('produk.outlet')
                 .with('produk.gambar')
+                .orderBy('created_at', 'desc')
                 .where({ id_user: authData.id_user }).fetch()
 
             const group = await this.groupItemBy(result.toJSON(), 'produk.id_mitra');

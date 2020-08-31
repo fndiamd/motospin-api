@@ -6,5 +6,6 @@ Route.group(() => {
     Route.get('view/:id', 'AlamatUserController.view')
     Route.put('update/:id', 'AlamatUserController.update')
     Route.delete('delete/:id', 'AlamatUserController.delete')
+    Route.get('get-primary', 'AlamatUserController.getPrimary')
     Route.put('change-primary/:id', 'AlamatUserController.changePrimary')
 }).prefix('api/v1/alamat-user').middleware('auth:user')

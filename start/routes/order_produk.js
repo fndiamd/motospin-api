@@ -9,4 +9,5 @@ Route.group(() => {
 
 Route.group(() => {
     Route.put('cancel/:id', 'OrderProdukController.outletCancelOrder')
+    Route.get('index', 'OrderProdukController.outletOrder')
 }).prefix('api/v1/order-produk/outlet').middleware(['auth:owner,pegawai,admin'])

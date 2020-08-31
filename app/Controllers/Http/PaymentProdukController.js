@@ -8,6 +8,7 @@ const Order = use('App/Models/OrderProduk')
 const OrderDetail = use('App/Models/DetailOrderProduk')
 const Ekspedisi = use('App/Models/PengirimanProduk')
 const Payment = use('App/Models/PaymentProduk')
+const Produk = use('App/Models/Produk')
 
 const Env = use('Env')
 const Event = use('Event')
@@ -18,7 +19,7 @@ class PaymentProdukController {
     async charge({ request, response, auth }) {
         const authData = await auth.authenticator('user').getUser()
         const idOrder = request.input('id_order')
-        
+
         let total = 0
 
         const thisOrder = await Order.findOrFail(idOrder)
@@ -94,9 +95,13 @@ class PaymentProdukController {
     async finish({ request, response }) {
         const req = request.all()
         const checkOrder = await Order.findBy('order_kode', req.order_id)
-        if(!checkOrder)
+
+        if (!checkOrder)
             return response.status(404).send({ message: 'Transaction not found!' })
-        
+
+        const produkOrder = await OrderDetail.query()
+            .with('produk')
+            .where({ id_order_produk: checkOrder.id_order_produk }).fetch()
         const payment = await Payment.findBy('id_order_produk', checkOrder.id_order_produk)
         const statusPayment = await axios.get(`https://api.sandbox.midtrans.com/v2/${req.order_id}/status`, {
             headers: {
@@ -115,11 +120,17 @@ class PaymentProdukController {
 
         let data = {}
         Object.keys(statusPayment).map(e => {
-            if(e !== 'transaction_status' && e !== 'payment_type' && e != 'status_message' && e != 'status_code'){
+            if (e !== 'transaction_status' && e !== 'payment_type' && e != 'status_message' && e != 'status_code') {
                 data[e] = statusPayment[e]
-                
+
             }
         })
+
+        for (let ow of produkOrder.rows) {
+            await Produk.query().where({ id_produk: ow.id_produk })
+                .update({ produk_stok: ow.toJSON().produk.produk_stok - ow.jumlah })
+        }
+
         Event.fire('pending::paymentProduk', checkOrder)
         payment.payment_detail = JSON.stringify(data)
         await payment.save()
@@ -130,13 +141,20 @@ class PaymentProdukController {
         try {
             const requestData = request.all()
             const order = await Order.findBy('order_kode', requestData.order_id)
-            switch(requestData.transaction_status){
+            switch (requestData.transaction_status) {
                 case 'pending':
                     order.order_status = 1
                     Event.fire('pending::paymentProduk', order)
                     break;
-                case 'cancel': 
+                case 'cancel':
                     order.order_status = -1
+                    const produkOrder = await OrderDetail.query()
+                        .with('produk')
+                        .where({ id_order_produk: order.id_order_produk }).fetch()
+                    for (let ow of produkOrder.rows) {
+                        await Produk.query().where({ id_produk: ow.id_produk })
+                            .update({ produk_stok: ow.toJSON().produk.produk_stok + ow.jumlah })
+                    }
                     Event.fire('cancel::paymentProduk', order)
                     break;
                 case 'settlement':
