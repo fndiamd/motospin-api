@@ -84,13 +84,6 @@ module.exports = {
   | The Api scheme makes use of API personal tokens to authenticate a user.
   |
   */
-  api: {
-    serializer: 'lucid',
-    model: 'App/Models/User',
-    scheme: 'api',
-    uid: 'email',
-    password: 'password'
-  },
   user: {
     serializer: 'lucid',
     model: 'App/Models/User',
@@ -113,17 +106,6 @@ module.exports = {
       expiresIn: 31557600000
     }
   },
-  pegawai: {
-    serializer: 'lucid',
-    model: 'App/Models/MitraPegawai',
-    scheme: 'jwt',
-    uid: 'pegawai_telp',
-    password: 'pegawai_password',
-    options: {
-      secret: `${Env.get('APP_KEY')}-mitra_pegawai`,
-      expiresIn: 31557600000
-    }
-  },
   admin: {
     serializer: 'lucid',
     model: 'App/Models/Admin',
@@ -135,6 +117,4 @@ module.exports = {
       expiresIn: 31557600000
     }
   }
-
-  
 }

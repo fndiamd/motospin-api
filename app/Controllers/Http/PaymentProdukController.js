@@ -131,7 +131,7 @@ class PaymentProdukController {
                 .update({ produk_stok: ow.toJSON().produk.produk_stok - ow.jumlah })
         }
 
-        Event.fire('pending::paymentProduk', checkOrder)
+        //Event.fire('pending::paymentProduk', checkOrder)
         payment.payment_detail = JSON.stringify(data)
         await payment.save()
         return payment
@@ -142,11 +142,11 @@ class PaymentProdukController {
             const requestData = request.all()
             const order = await Order.findBy('order_kode', requestData.order_id)
             switch (requestData.transaction_status) {
-                case 'pending':
+                case "201":
                     order.order_status = 1
                     Event.fire('pending::paymentProduk', order)
                     break;
-                case 'cancel':
+                case "202":
                     order.order_status = -1
                     const produkOrder = await OrderDetail.query()
                         .with('produk')
@@ -157,7 +157,7 @@ class PaymentProdukController {
                     }
                     Event.fire('cancel::paymentProduk', order)
                     break;
-                case 'settlement':
+                case "200":
                     order.order_status = 2
                     Event.fire('settlement::paymentProduk', order)
                     break;

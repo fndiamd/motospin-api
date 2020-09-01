@@ -3,6 +3,8 @@
 const Owner = use('App/Models/MitraOwner')
 const OwnerToken = use('App/Models/TokenOwner')
 const KodeOwner = use('App/Models/KodeOwner')
+const Dompet = use('App/Models/DompetOwner')
+
 const Mail = use('Mail')
 const MailChecker = require('./../../../../node_modules/mailchecker')
 const Env = use('Env')
@@ -43,6 +45,10 @@ class OwnerController {
             await Owner.create(data)
 
             const thisOwner = await Owner.findBy('owner_telp', data.owner_telp)
+            await Dompet.createMany([
+                { id_owner: thisOwner.id_owner, tipe_saldo: 'kredit' },
+                { id_owner: thisOwner.id_owner, tipe_saldo: 'debit' }
+            ])
             const accessToken = await auth.authenticator('owner').withRefreshToken().generate(thisOwner)
             await OwnerToken.create({
                 owner_id: thisOwner.id_owner,
@@ -213,21 +219,21 @@ class OwnerController {
             const thisToken = await OwnerToken.query().where('token', params.token).first()
             let id_owner = thisToken.owner_id
             const thisOwner = await Owner.findBy('id_owner', id_owner)
-            
+
             const data = {
                 new_password: request.input('new_password'),
                 confirm_password: request.input('confirm_password')
             }
 
-            if(data.new_password === data.confirm_password){
+            if (data.new_password === data.confirm_password) {
                 thisToken.is_revoked = true
                 thisOwner.owner_password = data.new_password
                 await thisOwner.save()
                 await thisToken.save()
 
-                return response.status(200).send({status: true})
-            }else{
-                return response.status(400).send({message: "password tidak sama"})
+                return response.status(200).send({ status: true })
+            } else {
+                return response.status(400).send({ message: "password tidak sama" })
             }
 
         } catch (error) {
@@ -241,14 +247,14 @@ class OwnerController {
 
     async viewChangePassword({ params, view, response }) {
         const thisToken = await OwnerToken.findBy('token', params.token)
-        if(thisToken){
+        if (thisToken) {
             return view.render('change-password')
-        }else{
+        } else {
             return view.render('404')
         }
     }
 
-    async update({ auth, request, response }){
+    async update({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const thisOwner = await Owner.findOrFail(authData.id_owner)
@@ -265,28 +271,28 @@ class OwnerController {
             await thisOwner.save()
             return response.json(thisOwner)
         } catch (error) {
-            if(error.name === 'ModelNotFoundException'){
-                return response.json({ message: 'Owner tidak ditemukan!'})
+            if (error.name === 'ModelNotFoundException') {
+                return response.json({ message: 'Owner tidak ditemukan!' })
             }
             return error.message
         }
     }
 
-    async updatePassword({ auth, request, response }){
+    async updatePassword({ auth, request, response }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const thisOwner = await Owner.findOrFail(authData.id_owner)
 
-            if(request.input('new_password') === request.input('confirm_password')){
+            if (request.input('new_password') === request.input('confirm_password')) {
                 thisOwner.owner_password = request.input('new_password')
                 await thisOwner.save()
-                return response.json({ message: 'success'})
-            }else{
+                return response.json({ message: 'success' })
+            } else {
                 return response.json({ message: 'Confirm password does\'t match' })
             }
         } catch (error) {
-            if(error.name === 'ModelNotFoundException'){
-                return response.json({ message: 'Owner tidak ditemukan'})
+            if (error.name === 'ModelNotFoundException') {
+                return response.json({ message: 'Owner tidak ditemukan' })
             }
             return error.message
         }

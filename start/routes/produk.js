@@ -15,4 +15,4 @@ Route.group(() => {
     Route.post('store', 'ProdukController.store')
     Route.put('update/:id', 'ProdukController.updateProduct')
     Route.delete('delete/:id', 'ProdukController.delete')
-}).prefix('api/v1/produk').middleware(['auth:owner,pegawai,admin'])
+}).prefix('api/v1/produk').middleware(['auth:owner,admin'])

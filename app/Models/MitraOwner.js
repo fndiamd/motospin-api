@@ -39,7 +39,11 @@ class MitraOwner extends Model {
     }
 
     outlet() {
-        return this.hasMany('App/Models/MitraOutlet')
+        return this.hasOne('App/Models/MitraOutlet', 'id_owner', 'id_owner')
+    }
+
+    dompet(){
+        return this.hasMany('App/Models/DompetOwner', 'id_owner', 'id_owner')
     }
 }
 

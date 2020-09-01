@@ -127,19 +127,12 @@ class OrderServiceController {
 
     async acceptOrder({ response, params, auth, request }) {
         try {
-            let id_mitra;
-            if(auth.user.id_pegawai){
-                const authData = await auth.authenticator('pegawai').getUser()
-                id_mitra = authData.id_mitra
-            }else if(auth.user.id_owner){
-                id_mitra = request.input('id_mitra')
-            }else{
-                return response.status(401).json()
-            }
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().first()
             
             const orderData = await OrderService.query()
                 .where({
-                    id_mitra: id_mitra,
+                    id_mitra: outlet.id_mitra,
                     id_order_service: params.id,
                     order_status: 0
                 })
@@ -166,18 +159,12 @@ class OrderServiceController {
 
     async declineOrder({ response, params, auth }) {
         try {
-            let id_mitra;
-            if(auth.user.id_pegawai){
-                const authData = await auth.authenticator('pegawai').getUser()
-                id_mitra = authData.id_mitra
-            }else if(auth.user.id_owner){
-                id_mitra = request.input('id_mitra')
-            }else{
-                return response.status(401).json()
-            }
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().first()
+
             const orderData = await OrderService.query()
                 .where({
-                    id_mitra: id_mitra,
+                    id_mitra: outlet.id_mitra,
                     id_order_service: params.id,
                     order_status: 0
                 })
@@ -203,18 +190,12 @@ class OrderServiceController {
 
     async finishOrder({ response, params, auth }) {
         try {
-            let id_mitra;
-            if(auth.user.id_pegawai){
-                const authData = await auth.authenticator('pegawai').getUser()
-                id_mitra = authData.id_mitra
-            }else if(auth.user.id_owner){
-                id_mitra = request.input('id_mitra')
-            }else{
-                return response.status(401).json()
-            }
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().first()
+
             const orderData = await OrderService.query()
                 .where({
-                    id_mitra: id_mitra,
+                    id_mitra: outlet.id_mitra,
                     id_order_service: params.id,
                     order_status: 1
                 })

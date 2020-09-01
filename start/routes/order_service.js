@@ -10,4 +10,4 @@ Route.group(() => {
     Route.post('accept-order/:id', 'OrderServiceController.acceptOrder')
     Route.post('decline-order/:id', 'OrderServiceController.declineOrder')
     Route.post('finish-order/:id', 'OrderServiceController.finishOrder')
-}).prefix('api/v1/order-service/outlet').middleware(['auth:owner,pegawai'])
+}).prefix('api/v1/order-service/outlet').middleware(['auth:owner,admin'])
