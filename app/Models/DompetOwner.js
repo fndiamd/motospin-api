@@ -11,6 +11,10 @@ class DompetOwner extends Model {
     owner(){
         return this.belongsTo('App/Models/MitraOwner', 'id_owner', 'id_owner')
     }
+
+    histori(){
+        return this.hasMany('App/Models/HistoriDompetOwner', 'id_dompet', 'id_dompet')
+    }
 }
 
 module.exports = DompetOwner

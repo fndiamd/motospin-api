@@ -12,6 +12,7 @@ class MitraOwnerSchema extends Schema {
       table.string('owner_email', 150).unique()
       table.string('owner_password', 200).notNullable()
       table.string('owner_avatar_path', 200)
+      table.string('owner_ktp').nullable()
       table.integer('owner_status').defaultTo(0)
       table.timestamps()
     })

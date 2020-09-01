@@ -95,7 +95,7 @@ class OrderProdukController {
                 })
             })
 
-            if(!idKeranjang)
+            if(idKeranjang.length > 0)
                 await Cart.query().whereIn('id_keranjang_produk', idKeranjang).delete()
             const detailOrder = await DetailOrder.createMany(orderProduk)
             const ekspedisi = await Ekspedisi.create({

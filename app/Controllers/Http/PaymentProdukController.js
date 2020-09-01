@@ -8,10 +8,8 @@ const Order = use('App/Models/OrderProduk')
 const OrderDetail = use('App/Models/DetailOrderProduk')
 const Ekspedisi = use('App/Models/PengirimanProduk')
 const Payment = use('App/Models/PaymentProduk')
-const Produk = use('App/Models/Produk')
 
 const Env = use('Env')
-const Event = use('Event')
 const key = Buffer.from(`${Env.get('MIDTRANS_SERVER_KEY')}:`).toString('base64')
 
 class PaymentProdukController {
@@ -90,84 +88,6 @@ class PaymentProdukController {
         })
 
         return response.json(httpReq)
-    }
-
-    async finish({ request, response }) {
-        const req = request.all()
-        const checkOrder = await Order.findBy('order_kode', req.order_id)
-
-        if (!checkOrder)
-            return response.status(404).send({ message: 'Transaction not found!' })
-
-        const produkOrder = await OrderDetail.query()
-            .with('produk')
-            .where({ id_order_produk: checkOrder.id_order_produk }).fetch()
-        const payment = await Payment.findBy('id_order_produk', checkOrder.id_order_produk)
-        const statusPayment = await axios.get(`https://api.sandbox.midtrans.com/v2/${req.order_id}/status`, {
-            headers: {
-                'Authorization': `Basic ${key}`,
-                'Content-Type': 'application/json',
-                'Accept': 'Accept'
-            }
-        }).then(result => {
-            return result.data
-        }).catch(err => {
-            return err
-        })
-
-        payment.transaction_status = statusPayment.transaction_status
-        payment.payment_type = statusPayment.payment_type
-
-        let data = {}
-        Object.keys(statusPayment).map(e => {
-            if (e !== 'transaction_status' && e !== 'payment_type' && e != 'status_message' && e != 'status_code') {
-                data[e] = statusPayment[e]
-
-            }
-        })
-
-        for (let ow of produkOrder.rows) {
-            await Produk.query().where({ id_produk: ow.id_produk })
-                .update({ produk_stok: ow.toJSON().produk.produk_stok - ow.jumlah })
-        }
-
-        //Event.fire('pending::paymentProduk', checkOrder)
-        payment.payment_detail = JSON.stringify(data)
-        await payment.save()
-        return payment
-    }
-
-    async notification({ request }) {
-        try {
-            const requestData = request.all()
-            const order = await Order.findBy('order_kode', requestData.order_id)
-            switch (requestData.transaction_status) {
-                case "201":
-                    order.order_status = 1
-                    Event.fire('pending::paymentProduk', order)
-                    break;
-                case "202":
-                    order.order_status = -1
-                    const produkOrder = await OrderDetail.query()
-                        .with('produk')
-                        .where({ id_order_produk: order.id_order_produk }).fetch()
-                    for (let ow of produkOrder.rows) {
-                        await Produk.query().where({ id_produk: ow.id_produk })
-                            .update({ produk_stok: ow.toJSON().produk.produk_stok + ow.jumlah })
-                    }
-                    Event.fire('cancel::paymentProduk', order)
-                    break;
-                case "200":
-                    order.order_status = 2
-                    Event.fire('settlement::paymentProduk', order)
-                    break;
-            }
-
-            await order.save()
-            return order
-        } catch (error) {
-            return error.message
-        }
     }
 
 }
