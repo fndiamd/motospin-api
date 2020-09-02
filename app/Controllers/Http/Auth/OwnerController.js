@@ -5,6 +5,7 @@ const OwnerToken = use('App/Models/TokenOwner')
 const KodeOwner = use('App/Models/KodeOwner')
 const Dompet = use('App/Models/DompetOwner')
 
+const Event = use('Event')
 const Mail = use('Mail')
 const MailChecker = require('./../../../../node_modules/mailchecker')
 const Env = use('Env')
@@ -66,10 +67,13 @@ class OwnerController {
             })
 
             const nama = data.owner_nama
+            const emailData = {
+                nama: nama,
+                kodeKonfirmasi: kodeKonfirmasi,
+                penerima: data.owner_email
+            }
 
-            await Mail.send('email-confirmation', { nama, kodeKonfirmasi }, (message) => {
-                message.to(data.owner_email).from('support@motospin.com').subject('[Kode Konfirmasi] Account Motospin')
-            })
+            Event.fire('registered::owner', emailData)
 
             return response.json({
                 "owner": thisOwner,
@@ -121,23 +125,31 @@ class OwnerController {
         }
     }
 
-    async verifyAccount({ request, response }) {
+    async verifyAccount({ auth, request, response }) {
         try {
+            const authData = await auth.authenticator('owner').getUser()
             const thisCode = await KodeOwner.query().where({
-                id_owner: request.input('id_owner'),
+                id_owner: authData.id_owner,
                 kode: request.input('kode'),
                 kode_status: 0
             }).first()
 
             if (thisCode) {
-                await Owner.query().where('id_owner', request.input('id_owner')).update({ owner_status: 1 })
+                await Owner.query().where('id_owner', authData.id_owner).update({ owner_status: 1 })
                 await KodeOwner.query().where({
-                    id_owner: request.input('id_owner'),
+                    id_owner: authData.id_owner,
                     kode: request.input('kode')
                 }).update({ kode_status: 1 })
-                return response.status(200).send({ status: true })
+
+                return response.status(200).send({
+                    status: true,
+                    message: 'Akun anda berhasil diverifikasi'
+                })
             } else {
-                return response.status(400).send({ status: false })
+                return response.status(400).send({
+                    status: false,
+                    message: 'Kode verifikasi tidak valid'
+                })
             }
         } catch (error) {
             return response.status(error.status).send({
@@ -162,15 +174,18 @@ class OwnerController {
             })
 
             const nama = thisOwner.owner_nama
-            const sendMail = await Mail.send('request-code', { nama, kodeKonfirmasi }, (message) => {
-                message.to(thisOwner.owner_email).from('support@motospin.com').subject('[Kode Konfirmasi] Owner Account Motospin')
-            })
-
-            if (sendMail) {
-                return response.status(200).send({ status: true })
-            } else {
-                return response.status(400).send({ status: false })
+            const emailData = {
+                nama: nama,
+                kodeKonfirmasi: kodeKonfirmasi,
+                penerima: thisOwner.owner_email
             }
+
+            Event.fire('requestCode::owner', emailData)
+
+            return response.status(200).send({
+                status: true,
+                message: 'Kode konfirmasi berhasil dikirimkan ke email'
+            })
 
         } catch (error) {
             return response.status(error.status).send({
@@ -195,16 +210,19 @@ class OwnerController {
 
             const nama = thisOwner.owner_nama
             const link = `${Env.APP_URL}api/v1/auth/owner-reset-password/${thisToken.token}`
-            const sendMail = await Mail.send('forgot-password', { nama, link }, (message) => {
-                message.to(thisOwner.owner_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisOwner.owner_nama + ' Motospin')
-            })
 
-            if (sendMail) {
-                return response.status(200).send({ status: true })
-            } else {
-                return response.status(200).send({ status: false })
+            const emailData = {
+                nama: nama,
+                link: link,
+                penerima: thisOwner.owner_email
             }
 
+            Event.fire('forgotPassword::owner', emailData)
+
+            return response.status(200).send({
+                status: true,
+                message: 'Link request password berhasil dikirimkan ke email'
+            })
         } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
@@ -231,9 +249,15 @@ class OwnerController {
                 await thisOwner.save()
                 await thisToken.save()
 
-                return response.status(200).send({ status: true })
+                return response.status(200).send({
+                    status: true,
+                    message: 'Password berhasil diubah'
+                })
             } else {
-                return response.status(400).send({ message: "password tidak sama" })
+                return response.status(400).send({
+                    status: false,
+                    message: 'Konfirmasi password anda tidak sama'
+                })
             }
 
         } catch (error) {
@@ -245,7 +269,7 @@ class OwnerController {
         }
     }
 
-    async viewChangePassword({ params, view, response }) {
+    async viewChangePassword({ params, view }) {
         const thisToken = await OwnerToken.findBy('token', params.token)
         if (thisToken) {
             return view.render('change-password')
@@ -286,9 +310,15 @@ class OwnerController {
             if (request.input('new_password') === request.input('confirm_password')) {
                 thisOwner.owner_password = request.input('new_password')
                 await thisOwner.save()
-                return response.json({ message: 'success' })
+                return response.json({
+                    status: true,
+                    message: 'Password anda berhasil diubah'
+                })
             } else {
-                return response.json({ message: 'Confirm password does\'t match' })
+                return response.json({
+                    status: false,
+                    message: 'Konfirmasi password anda tidak sama'
+                })
             }
         } catch (error) {
             if (error.name === 'ModelNotFoundException') {

@@ -3,9 +3,10 @@
 const User = use('App/Models/User')
 const UserToken = use('App/Models/Token')
 const KodeUser = use('App/Models/KodeUser')
-const Mail = use('Mail')
+
 const MailChecker = require('./../../../../node_modules/mailchecker')
 const Env = use('Env')
+const Event = use('Event')
 
 class UserController {
 
@@ -61,10 +62,13 @@ class UserController {
                 kode_status: 0
             })
             const nama = data.user_nama
-            // kirim email konfirmasi
-            await Mail.send('email-confirmation', { nama, kodeKonfirmasi }, (message) => {
-                message.to(data.user_email).from('support@motospin.com').subject('[Kode Konfirmasi] Account Motospin')
-            })
+            const emailData = {
+                nama: nama,
+                kodeKonfirmasi: kodeKonfirmasi,
+                penerima: data.user_email
+            }
+
+            Event.fire('registered::user', emailData)
 
             return response.json({
                 "user": thisUser,
@@ -125,23 +129,31 @@ class UserController {
         }
     }
 
-    async verifyAccount({ request, response }) {
+    async verifyAccount({ auth, request, response }) {
         try {
+            const authData = await auth.authenticator('user').getUser()
             const thisCode = await KodeUser.query().where({
-                id_user: request.input('id_user'),
+                id_user: authData.id_user,
                 kode: request.input('kode'),
                 kode_status: 0
             }).first()
 
             if (thisCode) {
-                await User.query().where('id_user', request.input('id_user')).update({ user_status: 1 })
+                await User.query().where('id_user', authData.id_user).update({ user_status: 1 })
                 await KodeUser.query().where({
-                    id_user: request.input('id_user'),
+                    id_user: authData.id_user,
                     kode: request.input('kode')
                 }).update({ kode_status: 1 })
-                return response.status(200).send({ status: true })
+
+                return response.status(200).send({
+                    status: true,
+                    message: 'Akun anda berhasil diverifikasi'
+                })
             } else {
-                return response.status(400).send({ status: false })
+                return response.status(400).send({
+                    status: false,
+                    message: 'Kode verifikasi tidak valid'
+                })
             }
         } catch (error) {
             return response.status(error).send({
@@ -166,16 +178,18 @@ class UserController {
             })
 
             const nama = thisUser.user_nama
-            // kirim email konfirmasi
-            const sendMail = await Mail.send('request-code', { nama, kodeKonfirmasi }, (message) => {
-                message.to(thisUser.user_email).from('support@motospin.com').subject('[Kode Konfirmasi] Account Motospin')
-            })
-
-            if (sendMail) {
-                return response.status(200).send({ status: true })
-            } else {
-                return response.status(400).send({ status: false })
+            const emailData = {
+                nama: nama,
+                kodeKonfirmasi: kodeKonfirmasi,
+                penerima: thisUser.user_email
             }
+            // kirim email konfirmasi
+            Event.fire('requestCode::user', emailData)
+
+            return response.status(200).send({
+                status: true,
+                message: 'Kode konfirmasi berhasil dikirimkan ke email'
+            })
         } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
@@ -202,15 +216,19 @@ class UserController {
 
             const nama = thisUser.user_nama
             const link = `${Env.APP_URL}api/v1/auth/user-reset-password/${thisToken.token}`
-            const sendMail = await Mail.send('forgot-password', { nama, link }, (message) => {
-                message.to(thisUser.user_email).from('support@motospin.com').subject('[Reset Password] Account ' + thisUser.user_nama + ' Motospin')
-            })
 
-            if (sendMail) {
-                return response.status(200).send({ status: true })
-            } else {
-                return response.status(200).send({ status: false })
+            const emailData = {
+                nama: nama,
+                link: link,
+                penerima: thisUser.user_email
             }
+
+            Event.fire('forgotPassword::user', emailData)
+
+            return response.status(200).send({
+                status: true,
+                message: 'Link request password berhasil dikirimkan ke email'
+            })
 
         } catch (error) {
             return response.status(error.status).send({
@@ -238,9 +256,15 @@ class UserController {
                 await thisUser.save()
                 await thisToken.save()
 
-                return response.status(200).send({ status: 'Berhasil ganti password!' })
+                return response.status(200).send({
+                    status: true,
+                    message: 'Password anda berhasil diubah'
+                })
             } else {
-                return response.status(400).send({ message: "Password tidak sama" })
+                return response.status(400).send({
+                    status: false,
+                    message: 'Konfirmasi password baru anda tidak sama'
+                })
             }
 
         } catch (error) {
@@ -252,7 +276,7 @@ class UserController {
         }
     }
 
-    async viewChangePassword({ params, view, response }) {
+    async viewChangePassword({ params, view }) {
         const thisToken = await UserToken.findBy('token', params.token)
         if (thisToken) {
             return view.render('change-password')
@@ -317,7 +341,7 @@ class UserController {
     }
 
     async handleProviderCallback({ params, ally, auth, response }) {
-        
+
         try {
             const provider = params.provider
             const userData = await ally.driver(provider).getUser()
@@ -333,11 +357,11 @@ class UserController {
                     return response.json({
                         user: thisUser,
                         accessToken: token
-                    })    
+                    })
                 } catch (error) {
                     return error.message
                 }
-                
+
             } else {
                 const data = {
                     user_nama: userData.getName(),
@@ -348,7 +372,7 @@ class UserController {
                     user_level: 0
                 }
 
-                const user = await User.create(data)   
+                const user = await User.create(data)
                 const token = await auth.authenticator('user').withRefreshToken().generate(user)
                 return response.json({
                     user: user,
