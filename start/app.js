@@ -20,6 +20,7 @@ const providers = [
   '@adonisjs/mail/providers/MailProvider',
   '@adonisjs/framework/providers/ViewProvider',
   '@adonisjs/ally/providers/AllyProvider',
+  '@adonisjs/websocket/providers/WsProvider',
   path.join(__dirname, '..', 'providers', 'firebaseServiceProvider')
 ]
 
