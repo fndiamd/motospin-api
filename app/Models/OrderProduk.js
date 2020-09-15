@@ -10,23 +10,23 @@ class OrderProduk extends Model {
     }
 
     user(){
-        this.belongsTo('App/Models/User')
+        return this.belongsTo('App/Models/User', 'id_user', 'id_user')
     }
 
     outlet(){
-        this.belongsTo('App/Models/MitraOutlet')
+        return this.belongsTo('App/Models/MitraOutlet', 'id_mitra', 'id_mitra')
     }
 
     detailOrder(){
-        this.hasMany('App/Model/DetailOrderSparepart')
+        return this.hasMany('App/Models/DetailOrderProduk', 'id_order_produk', 'id_order_produk')
     }
 
     payment(){
-        this.hasOne('App/Models/PaymentProduk')
+        return this.hasOne('App/Models/PaymentProduk', 'id_order_produk', 'id_order_produk')
     }
 
     ekspedisi(){
-        this.hasOne('App/Models/PengirimanProduk')
+        return this.hasOne('App/Models/PengirimanProduk', 'id_order_produk', 'id_order_produk')
     }
 
 }

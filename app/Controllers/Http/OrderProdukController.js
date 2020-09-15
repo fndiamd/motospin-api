@@ -38,7 +38,7 @@ class OrderProdukController {
         }
     }
 
-    async outletOrder({ request, response }){
+    async outletOrder({ request, response }) {
         try {
             const pagination = request.only(['page', 'limit', 'column', 'sort'])
             const page = pagination.page || 1
@@ -48,7 +48,7 @@ class OrderProdukController {
 
             const result = await Order
                 .query()
-                .with('outlet')
+                .with('user')
                 .with('detailOrder.produk')
                 .with('payment')
                 .with('ekspedisi')
@@ -85,7 +85,7 @@ class OrderProdukController {
             const orderProduk = []
             const idKeranjang = []
             req.produkCart.map(item => {
-                if(item.id_keranjang_produk)
+                if (item.id_keranjang_produk)
                     idKeranjang.push(item.id_keranjang_produk)
                 orderProduk.push({
                     id_produk: item.id_produk,
@@ -95,7 +95,7 @@ class OrderProdukController {
                 })
             })
 
-            if(idKeranjang.length > 0)
+            if (idKeranjang.length > 0)
                 await Cart.query().whereIn('id_keranjang_produk', idKeranjang).delete()
             const detailOrder = await DetailOrder.createMany(orderProduk)
             const ekspedisi = await Ekspedisi.create({
@@ -181,6 +181,62 @@ class OrderProdukController {
             return response.json({ message: 'Order berhasil dibatalkan' })
         } catch (error) {
             return response.status(error).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async userOrderHistory({ auth, request, response }) {
+        try {
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
+            const authData = await auth.authenticator('user').getUser()
+            const result = await Order
+                .query()
+                .with('outlet')
+                .with('detailOrder.produk')
+                .with('payment')
+                .with('ekspedisi')
+                .where({ id_user: authData.id_user })
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async outletOrderHistory({ auth, request, response }) {
+        try {
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().fetch()
+
+            const result = await Order
+                .query()
+                .with('user')
+                .with('detailOrder.produk')
+                .with('payment')
+                .with('ekspedisi')
+                .where({ id_mitra: outlet.id_mitra })
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
                 error: error.name,
                 message: error.message
             })

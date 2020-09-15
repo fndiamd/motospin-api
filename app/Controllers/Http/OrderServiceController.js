@@ -34,6 +34,90 @@ class OrderServiceController {
         }
     }
 
+    async userOrderHistory({ auth, response, request }) {
+        try {
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
+            const authData = await auth.authenticator('user').getUser()
+            const result = await OrderService
+                .query()
+                .with('outlet')
+                .with('merkKendaraan')
+                .with('tipeKendaraan')
+                .with('detailOrder.tipeService')
+                .where({ id_user: authData.id_user})
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async serviceOutlet({ auth, response, request }) {
+        try {
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().fetch()
+
+            const result = await OrderService
+                .query()
+                .with('user')
+                .with('merkKendaraan')
+                .with('tipeKendaraan')
+                .with('detailOrder.tipeService')
+                .where({ id_mitra: outlet.id_mitra, order_status: request.input('status') })
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
+    async outletOrderHistory({ auth, response, request }) {
+        try {
+            const pagination = request.only(['page', 'limit', 'column', 'sort'])
+            const page = pagination.page || 1
+            const limit = pagination.limit || 5
+            const column = pagination.column || 'created_at'
+            const sort = pagination.sort || 'desc'
+
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().fetch()
+            const result = await OrderService
+                .query()
+                .with('user')
+                .with('merkKendaraan')
+                .with('tipeKendaraan')
+                .with('detailOrder.tipeService')
+                .where({ id_mitra: outlet.id_mitra})
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+            return response.json(result)
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+    }
+
     async viewOrderUser({ auth, response, params }) {
         try {
             const authData = await auth.authenticator('user').getUser()
@@ -125,7 +209,7 @@ class OrderServiceController {
         }
     }
 
-    async acceptOrder({ response, params, auth, request }) {
+    async acceptOrder({ response, params, auth }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const outlet = await authData.outlet().first()
@@ -208,7 +292,10 @@ class OrderServiceController {
             const order = await OrderService.query()
                 .where({
                     id_order_service: params.id,
-                }).with('outlet').first()
+                })
+                .with('outlet')
+                .with('detailOrder')
+                .first()
             Event.fire('finish::orderService', order)
             return response.json({ message: 'Order finished' })
         } catch (error) {

@@ -3,8 +3,10 @@
 const MitraOutlet = use('App/Models/MitraOutlet')
 const ServiceBengkel = use('App/Models/ServiceBengkel')
 const JenisService = use('App/Models/JenisService')
+
 const Env = use('Env')
 const Helpers = use('Helpers')
+const Database = use('Database')
 
 class MitraOutletController {
 
@@ -266,6 +268,7 @@ class MitraOutletController {
         try {
             const thisOutlet = await MitraOutlet
                 .query()
+                .with('owner')
                 .where({ id_mitra: params.id })
                 .first()
             if (!thisOutlet) {
@@ -300,20 +303,8 @@ class MitraOutletController {
 
     async myOutlets({ auth, response, request }) {
         try {
-            const pagination = request.only(['page', 'limit', 'column', 'sort'])
-            const page = pagination.page || 1
-            const limit = pagination.limit || 5
-            const column = pagination.column || 'created_at'
-            const sort = pagination.sort || 'desc'
-
             const authData = await auth.authenticator('owner').getUser()
-            const myOutlets = await MitraOutlet
-                .query()
-                .where({ id_owner: authData.id_owner })
-                .orderBy(`${column}`, `${sort}`)
-                .paginate(page, limit)
-
-            return response.json(myOutlets)
+            return response.ok(await authData.outlet().first())
         } catch (error) {
             return response.status(error.status).send({
                 status: error.status,
@@ -331,7 +322,7 @@ class MitraOutletController {
                 .whereRaw(`id_jenis_mitra = ${keywords.id_jenis_mitra} AND LOWER(mitra_nama) LIKE '%${keywords.mitra_nama}%'`)
                 .fetch()
 
-            if(result.rows.length == 0){
+            if (result.rows.length == 0) {
                 return response.status(404).send({ message: `Pencarian untuk ${keywords.mitra_nama} tidak ditemukan` })
             }
 
@@ -339,6 +330,37 @@ class MitraOutletController {
         } catch (error) {
             return error.message
         }
+    }
+
+    async filter({ request, response }) {
+        const pagination = request.only(['page', 'limit', 'column', 'sort'])
+        const services = request.input('services')
+        const keyword = request.input('keyword')
+
+        let page = pagination.page || 1
+        let limit = pagination.limit || 5
+        let column = pagination.column || 'created_at'
+        let sort = pagination.sort || 'desc'
+
+        let mitra = []
+
+        const getMitraService = await Database
+            .table('service_bengkels')
+            .distinct('id_mitra')
+            .whereIn('id_jenis_service', services)
+
+        getMitraService.map(e => {
+            mitra.push(e.id_mitra)
+        })
+
+        let queryRaw = `id_mitra IN (${mitra})`
+
+        if(keyword != null)
+            queryRaw += `AND LOWER(mitra_nama) LIKE '%${keyword.toLowerCase()}%'`
+
+        const result = await MitraOutlet.query().whereRaw(queryRaw).fetch()
+        return response.json(result)
+
     }
 
     async image_path({ response, params }) {

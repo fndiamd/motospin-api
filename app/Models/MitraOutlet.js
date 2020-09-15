@@ -9,10 +9,6 @@ class MitraOutlet extends Model {
         return 'id_mitra'
     }
 
-    pegawai(){
-        return this.hasMany('App/Models/MitraPegawai')
-    }
-
     jenisMitra(){
         return this.belongsTo('App/Models/JenisMitra', 'id_jenis_mitra', 'id_jenis_mitra')
     }
@@ -33,8 +29,8 @@ class MitraOutlet extends Model {
         return this.hasMany('App/Models/Produk')
     }
 
-    orderSparepart(){
-        return this.hasMany('App/Models/OrderSparepart')
+    orderProduk(){
+        return this.hasMany('App/Models/OrderProduk')
     }
 
     orderService(){

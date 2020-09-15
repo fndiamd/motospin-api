@@ -48,10 +48,10 @@ class RajaOngkirController {
         try {
             const authData = await auth.authenticator('user').getUser()
             const mitra = await MitraOutlet.find(request.input('id_mitra'))
-            const alamatUser = await Alamat.query().where({ id_user: authData.id_user, primary: true }).first()
+            // const alamatUser = await Alamat.query().where({ id_user: authData.id_user, primary: true }).first()
             const data = {
                 origin: mitra.city_id,
-                destination: alamatUser.city_id,
+                destination: request.input('city_id'),
                 weight: request.input('weight'),
                 courier: request.input('courier')
             }

@@ -6,6 +6,9 @@ const Order = use('App/Models/OrderProduk')
 const Payment = use('App/Models/PaymentProduk')
 const OrderDetail = use('App/Models/DetailOrderProduk')
 const Produk = use('App/Models/Produk')
+const Outlet = use('App/Models/MitraOutlet')
+const Dompet = use('App/Models/DompetOwner')
+const HistoriDompet = use('App/Models/HistoriDompetOwner')
 
 const Env = use('Env')
 const key = Buffer.from(`${Env.get('MIDTRANS_SERVER_KEY')}:`).toString('base64')
@@ -179,6 +182,23 @@ PaymentProduk.settlementPaymentProduk = async (requestData) => {
     const order = await Order.findBy('order_kode', requestData.order_id)
     order.order_status = 2
     await order.save()
+
+    const outlet = await Outlet.findBy('id_mitra', order.id_mitra)
+    
+    let cost = Math.ceil(requestData.gross_amount * 0.01)
+    if (cost > 2500)
+        cost = 2500
+
+    const dompet = await Dompet.findBy({ 'id_owner': outlet.id_owner, 'tipe_saldo': 'kredit'})
+    dompet.saldo -= cost
+    await dompet.save()
+
+    await HistoriDompet.create({
+        id_dompet: dompet.id_dompet,
+        kode_transaksi: requestData.order_id,
+        nominal_transaksi: -cost,
+        status_transaksi: 2
+    })
 
     const payment = await Payment.findBy('id_order_produk', order.id_order_produk)
     const statusPayment = await axios.get(`https://api.sandbox.midtrans.com/v2/${requestData.order_id}/status`, {

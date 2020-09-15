@@ -27,6 +27,8 @@ require('./routes/payment_produk')
 require('./routes/midtrans')
 require('./routes/dompet_owner')
 require('./routes/room_chat')
+require('./routes/wishlist')
+require('./routes/bengkel_favorite')
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }

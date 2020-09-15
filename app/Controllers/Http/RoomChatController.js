@@ -14,6 +14,8 @@ class RoomChatController {
             .query()
             .where('uuid', params.id)
             .with('messages')
+            .with('owner')
+            .with('user')
             .first()
 
         if (!room) {
@@ -24,22 +26,34 @@ class RoomChatController {
     }
 
 
-    async store({ request }){
-        const data = request.only(['id_user', 'id_owner'])
+    async store({ auth, request, response }) {
+        const authData = await auth.authenticator('user').getUser()
+
         const room = new Room()
         const uuid = uuidv4()
 
+        const checkRoomExists = await Room
+            .query()
+            .where({
+                'id_user': authData.id_user,
+                'id_owner': request.input('id_owner')
+            })
+            .first()
+
+        if (checkRoomExists)
+            return response.badRequest({ message: 'Room chat sudah ada' })
+
         room.uuid = uuid
-        room.id_user = data.id_user
-        room.id_owner = data.id_owner
-        
+        room.id_user = authData.id_user
+        room.id_owner = request.input('id_owner')
+
         await room.save()
         return Room.query().with('user').with('owner').where('uuid', uuid).first()
     }
 
-    async createMessage({ params, request, response }){
+    async createMessage({ params, request, response }) {
         const room = await Room.find(params.id)
-        if(!room){
+        if (!room) {
             return response.notFound('Room chat tidak tersedia')
         }
 
@@ -52,6 +66,28 @@ class RoomChatController {
         const message = await room.messages().create(data)
         broadcast(room.uuid, 'room:newMessage', message)
         return message
+    }
+
+    async userRoomList({ auth, response }) {
+        const authData = await auth.authenticator('user').getUser()
+        const listroom = await Room
+            .query()
+            .where('id_user', authData.id_user)
+            .with('messages')
+            .with('owner')
+            .fetch()
+        return response.ok(listroom)
+    }
+
+    async ownerRoomList({ auth, response }) {
+        const authData = await auth.authenticator('owner').getUser()
+        const listroom = await Room
+            .query()
+            .where('id_owner', authData.id_owner)
+            .with('messages')
+            .with('user')
+            .fetch()
+        return response.ok(listroom)
     }
 
 }

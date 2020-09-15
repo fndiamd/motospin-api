@@ -146,6 +146,48 @@ class ProdukController {
         }
     }
 
+    async filterProduk({ request, response }) {
+        const pagination = request.only(['page', 'limit', 'column', 'sort'])
+        const filter = request.only(['kategori', 'merk'])
+        const keyword = request.input('keyword')
+
+        let page = pagination.page || 1
+        let limit = pagination.limit || 5
+        let column = pagination.column || 'created_at'
+        let sort = pagination.sort || 'desc'
+
+        let queryRaw
+
+        if (filter.kategori != null) {
+            if (queryRaw != undefined)
+                queryRaw += ' AND '
+            queryRaw += `WHERE id_kategori_produk = '${filter.kategori}'`
+        }
+
+
+        if (filter.merk != null) {
+            if (queryRaw != undefined)
+                queryRaw += ' AND '
+            queryRaw += `WHERE id_merk_produk = '${filter.merk}'`
+        }
+
+
+        if (keyword != null) {
+            if (queryRaw != undefined)
+                queryRaw += ' AND '
+            queryRaw += `LOWER(produk_nama) LIKE '%${keyword.toLowerCase()}%'`
+        }
+
+        queryRaw = queryRaw.replace('undefined', '')
+        const query = queryRaw.split(' ').slice(1).join(' ')
+        const result = await Produk
+            .query()
+            .whereRaw(query)
+            .fetch()
+
+        return response.json(result)
+    }
+
     async produkOutlet({ request, response }) {
         try {
             const pagination = request.only(['page', 'limit', 'column', 'sort'])

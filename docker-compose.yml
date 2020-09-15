@@ -1,0 +1,29 @@
+version: '3'
+
+services: 
+    postgres:
+        container_name: 'motospin-postgres'
+        image: postgres
+        environment: 
+            POSTGRES_USER: motospinpostgres
+            POSTGRES_PASSWORD: motospinpostgres
+            POSTGRES_DB: motospin-db
+        volumes: 
+            - motospin-data-app:/var/lib/postgresql/data
+        networks: 
+            - motospin-net-app
+    node:
+        container_name: 'motospin-api'
+        build: .
+        ports: 
+            - "3332:3333"
+        depends_on: 
+            - postgres
+        networks: 
+            - motospin-net-app
+        volumes: 
+            - ./app
+volumes: 
+    motospin-data-app:
+networks:
+    motospin-net-app:

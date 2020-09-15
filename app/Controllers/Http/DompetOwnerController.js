@@ -115,7 +115,45 @@ class DompetOwnerController {
         }
     }
 
+    async historyDebitWallet({ response, auth }) {
+        const pagination = request.only(['page', 'limit', 'column', 'sort'])
+        let page = pagination.page || 1
+        let limit = pagination.limit || 10
+        let column = pagination.column || 'created_at'
+        let sort = pagination.sort || 'desc'
 
+        const authData = await auth.authenticator('owner').getUser()
+        const dompet = await Dompet.findBy({ id_owner: authData.id_owner, tipe_saldo: 'debit' })
+        const histori = await Histori
+            .query()
+            .where('id_dompet', dompet.id_dompet)
+            .orderBy(`${column}`, `${sort}`)
+            .paginate(page, limit)
+        return response.json({
+            dompet: dompet,
+            histori: histori
+        })
+    }
+
+    async historyCreditWallet({ response, auth, request }) {
+        const pagination = request.only(['page', 'limit', 'column', 'sort'])
+        let page = pagination.page || 1
+        let limit = pagination.limit || 10
+        let column = pagination.column || 'created_at'
+        let sort = pagination.sort || 'desc'
+
+        const authData = await auth.authenticator('owner').getUser()
+        const dompet = await Dompet.findBy({ id_owner: authData.id_owner, tipe_saldo: 'kredit' })
+        const histori = await Histori
+            .query()
+            .where('id_dompet', dompet.id_dompet)
+            .orderBy(`${column}`, `${sort}`)
+            .paginate(page, limit)
+        return response.json({
+            dompet: dompet,
+            histori: histori
+        })
+    }
 
 }
 

@@ -5,6 +5,7 @@ Route.group(() => {
     Route.get('view/:id', 'ProdukController.view')
     Route.post('search-name', 'ProdukController.searchName')
     Route.get('produk-outlet', 'ProdukController.produkOutlet')
+    Route.post('filter', 'ProdukController.filterProduk')
 }).prefix('api/v1/produk')
 
 Route.group(() => {
