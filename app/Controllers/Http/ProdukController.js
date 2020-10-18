@@ -5,8 +5,12 @@ const Kendaraan = use('App/Models/KendaraanUser')
 const GambarProduk = use('App/Models/GambarProduk')
 const KompatibelProduk = use('App/Models/KompatibelProduk')
 
+const ImportService = use('App/Services/ImportProductServices')
+
 const Helpers = use('Helpers')
 const Env = use('Env')
+const fs = require('fs')
+const path = require('path')
 
 class ProdukController {
 
@@ -168,7 +172,7 @@ class ProdukController {
         if (filter.merk != null) {
             if (queryRaw != undefined)
                 queryRaw += ' AND '
-            queryRaw += `WHERE id_merk_produk = '${filter.merk}'`
+            queryRaw += `id_merk_produk = '${filter.merk}'`
         }
 
 
@@ -182,6 +186,11 @@ class ProdukController {
         const query = queryRaw.split(' ').slice(1).join(' ')
         const result = await Produk
             .query()
+            .with('outlet')
+            .with('gambar')
+            .with('kategori')
+            .with('merk')
+            .with('kompatibelProduk')
             .whereRaw(query)
             .fetch()
 
@@ -418,6 +427,38 @@ class ProdukController {
     }
 
     async updateCompatibleProduct() {
+    }
+
+    async importProduk({ request, response, auth }) {
+        try {
+            const authData = await auth.authenticator('owner').getUser()
+            const outlet = await authData.outlet().fetch()
+            let file = request.file('excel_file')
+            let fname = `${new Date().getTime()}.${file.extname}`
+            let dir = 'upload/'
+
+            //move uploaded file into custom folder
+            await file.move(Helpers.tmpPath(dir), {
+                name: fname
+            })
+
+            if (!file.moved()) {
+                console.log('error')
+                return (file.error(), 'Error moving files', 500)
+            }
+
+            let send = await ImportService.ImportClassification(outlet.id_mitra, 'tmp/' + dir + fname)
+
+            const removeFile = Helpers.promisify(fs.unlink)
+            if(send){
+                removeFile(path.join(file._location, fname))
+                return response.ok({ message: 'Import produk berhasil' })
+            }
+            
+
+        } catch (error) {
+            return error.message
+        }
     }
 
 

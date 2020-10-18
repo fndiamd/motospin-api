@@ -12,6 +12,10 @@ class User extends Model {
     return 'id_user'
   }
 
+  static get hidden(){
+    return ['user_password']
+  }
+
   static boot() {
     super.boot()
 

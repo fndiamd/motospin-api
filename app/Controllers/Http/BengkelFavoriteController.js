@@ -4,7 +4,7 @@ const BengkelFavorite = use('App/Models/BengkelFavorite')
 
 class BengkelFavoriteController {
 
-    async index({ auth, request, response }) {
+    async index({ auth, response, request }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const paginataion = request.only(['page', 'column', 'limit', 'sort'])
@@ -31,18 +31,15 @@ class BengkelFavoriteController {
         }
     }
 
-    async store({ auth, request, response }) {
+    async store({ auth, response, request }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const bengkel = request.input('id_mitra')
 
-            const checkExists = await BengkelFavorite
-                .query()
-                .where({
-                    id_user: authData.id_user,
-                    id_mitra: bengkel
-                })
-                .first()
+            const checkExists = await BengkelFavorite.findByOrFail({
+                id_user: authData.id_user,
+                id_mitra: bengkel
+            })
 
             if (checkExists)
                 return response.badRequest({ message: 'Bengkel sudah difavoritkan' })
@@ -62,13 +59,13 @@ class BengkelFavoriteController {
         }
     }
 
-    async delete({ auth, request, response }) {
+    async delete({ auth, response, request }) {
         try {
             const authData = await auth.authenticator('user').getUser()
             const bengkel = request.input('id_mitra')
 
             const thisData = await BengkelFavorite
-                .findBy({
+                .findByOrFail({
                     id_user: authData.id_user,
                     id_mitra: bengkel
                 })
@@ -77,7 +74,7 @@ class BengkelFavoriteController {
                 return response.badRequest({ message: 'Bengkel tidak ada dalam daftar favorite' })
 
             await thisData.delete()
-            return response.accepted({ message: 'Bengkel dihapus dari daftar favorite' })
+            return response.ok({ message: 'Bengkel dihapus dari daftar favorite' })
         } catch (error) {
             return response.conflict({
                 status: error.status,

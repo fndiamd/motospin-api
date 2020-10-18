@@ -139,6 +139,10 @@ class MitraOutletController {
             const authData = await auth.authenticator('owner').getUser()
             const fileName = `${authData.id_owner}-${imgOutlet.clientName}`
 
+            const checkExists = await MitraOutlet.findBy('id_owner', authData.id_owner)
+            if(checkExists)
+                return response.status(400).send({ message: 'Tidak dapat mendaftar lebih dari 1 mitra' })
+
             const parseData = {
                 mitra_nama: request.input('mitra_nama'),
                 mitra_telp: request.input('mitra_telp'),

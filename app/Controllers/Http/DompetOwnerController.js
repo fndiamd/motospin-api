@@ -10,7 +10,7 @@ const axios = use('axios')
 
 class DompetOwnerController {
 
-    async index({ response, auth }) {
+    async index({ auth, response }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const dompet = await Dompet.query().where({ id_owner: authData.id_owner }).fetch()
@@ -24,7 +24,7 @@ class DompetOwnerController {
         }
     }
 
-    async getCreditWallet({ response, auth }) {
+    async getCreditWallet({ auth, response }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const dompet = await Dompet.query().where({
@@ -32,7 +32,7 @@ class DompetOwnerController {
                 tipe_saldo: 'kredit'
             }).first()
 
-            return dompet
+            return response.ok(dompet)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -41,7 +41,7 @@ class DompetOwnerController {
         }
     }
 
-    async getDebitWallet({ response, auth }) {
+    async getDebitWallet({ auth, response }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const dompet = await Dompet.query().where({
@@ -49,7 +49,7 @@ class DompetOwnerController {
                 tipe_saldo: 'debit'
             }).first()
 
-            return dompet
+            return response.ok(dompet)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -58,7 +58,7 @@ class DompetOwnerController {
         }
     }
 
-    async topUpCredit({ auth, request, response }) {
+    async topUpCredit({ auth, response, request }) {
         try {
             const authData = await auth.authenticator('owner').getUser()
             const transaction_data = {
@@ -115,24 +115,33 @@ class DompetOwnerController {
         }
     }
 
-    async historyDebitWallet({ response, auth }) {
+    async historyDebitWallet({ auth, response }) {
         const pagination = request.only(['page', 'limit', 'column', 'sort'])
         let page = pagination.page || 1
         let limit = pagination.limit || 10
         let column = pagination.column || 'created_at'
         let sort = pagination.sort || 'desc'
 
-        const authData = await auth.authenticator('owner').getUser()
-        const dompet = await Dompet.findBy({ id_owner: authData.id_owner, tipe_saldo: 'debit' })
-        const histori = await Histori
-            .query()
-            .where('id_dompet', dompet.id_dompet)
-            .orderBy(`${column}`, `${sort}`)
-            .paginate(page, limit)
-        return response.json({
-            dompet: dompet,
-            histori: histori
-        })
+        try {
+            const authData = await auth.authenticator('owner').getUser()
+            const dompet = await Dompet.findBy({ id_owner: authData.id_owner, tipe_saldo: 'debit' })
+            const histori = await Histori
+                .query()
+                .where('id_dompet', dompet.id_dompet)
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+
+            return response.ok({
+                dompet: dompet,
+                histori: histori
+            })
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+
     }
 
     async historyCreditWallet({ response, auth, request }) {
@@ -142,17 +151,26 @@ class DompetOwnerController {
         let column = pagination.column || 'created_at'
         let sort = pagination.sort || 'desc'
 
-        const authData = await auth.authenticator('owner').getUser()
-        const dompet = await Dompet.findBy({ id_owner: authData.id_owner, tipe_saldo: 'kredit' })
-        const histori = await Histori
-            .query()
-            .where('id_dompet', dompet.id_dompet)
-            .orderBy(`${column}`, `${sort}`)
-            .paginate(page, limit)
-        return response.json({
-            dompet: dompet,
-            histori: histori
-        })
+        try {
+            const authData = await auth.authenticator('owner').getUser()
+            const dompet = await Dompet.findBy({ id_owner: authData.id_owner, tipe_saldo: 'kredit' })
+            const histori = await Histori
+                .query()
+                .where('id_dompet', dompet.id_dompet)
+                .orderBy(`${column}`, `${sort}`)
+                .paginate(page, limit)
+
+            return response.ok({
+                dompet: dompet,
+                histori: histori
+            })
+        } catch (error) {
+            return response.status(error.status).send({
+                error: error.name,
+                message: error.message
+            })
+        }
+
     }
 
 }

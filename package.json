@@ -28,6 +28,7 @@
     "@adonisjs/mail": "^3.0.10",
     "@adonisjs/websocket": "^1.0.12",
     "axios": "^0.20.0",
+    "exceljs": "^4.1.1",
     "firebase-admin": "^9.1.0",
     "mailchecker": "^3.3.11",
     "moment": "^2.27.0",

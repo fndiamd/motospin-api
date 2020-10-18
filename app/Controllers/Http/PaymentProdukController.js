@@ -31,6 +31,7 @@ class PaymentProdukController {
         thisDetailOrder.toJSON().map(e => {
             total += e.produk.produk_harga * e.jumlah
         })
+        
         total += ekspedisi.courier_cost
         const itemDetails = [
             {

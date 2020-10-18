@@ -11,6 +11,10 @@ class MitraOwner extends Model {
         return 'id_owner'
     }
 
+    static get hidden(){
+        return ['owner_password', 'owner_ktp']
+    }
+
     static boot() {
         super.boot()
 

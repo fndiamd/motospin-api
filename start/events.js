@@ -1,10 +1,22 @@
 const Event = use('Event')
 
 // Order Service Notification
-Event.on('new::orderService', 'Notification.createdOrderService')
-Event.on('accept::orderService', 'Notification.acceptOrderService')
-Event.on('decline::orderService', 'Notification.declineOrderService')
-Event.on('finish::orderService', 'Notification.finishOrderService')
+Event.on('new::orderService', 'OrderService.createdOrderService')
+Event.on('notifOutlet::orderService', 'OrderService.incomingOrderService')
+Event.on('accept::orderService', 'OrderService.acceptOrderService')
+Event.on('decline::orderService', 'OrderService.declineOrderService')
+Event.on('cancel::orderService', 'OrderService.cancelOrderService')
+Event.on('finish::orderService', 'OrderService.finishOrderService')
+Event.on('working::orderService', 'OrderService.workingOrderService')
+
+// Order Produk Notification
+Event.on('notifOutlet::orderProduk', 'OrderProduk.incomingOrderProduk')
+Event.on('notifOutletCOD::orderProduk', 'OrderProduk.incomingOrderProdukCOD')
+Event.on('accept::orderProduk', 'OrderProduk.acceptOrderProduk')
+Event.on('sending::orderProduk', 'OrderProduk.sendingOrderProduk')
+Event.on('outletCancel::orderProduk', 'OrderProduk.outletCancelOrderProduk')
+Event.on('userCancel::orderProduk', 'OrderProduk.userCancelOrderProduk')
+Event.on('finish::orderProduk', 'OrderProduk.finishOrderProduk')
 
 // Order Produk Payment Notification
 Event.on('pending::paymentProduk', 'PaymentProduk.pendingPaymentProduk')

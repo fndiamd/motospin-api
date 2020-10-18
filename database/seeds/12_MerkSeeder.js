@@ -17,6 +17,10 @@ class MerkSeeder {
   async run() {
     const data = [
       {
+        merk_produk: 'Tidak ada merk',
+        merk_status: 1
+      },
+      {
         merk_produk: 'Denso',
         merk_status: 1
       },

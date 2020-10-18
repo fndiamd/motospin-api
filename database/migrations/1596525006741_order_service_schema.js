@@ -13,6 +13,7 @@ class OrderServiceSchema extends Schema {
       table.integer('kendaraan_tahun')
       table.string('kendaraan_no_rangka')
       table.integer('order_status').defaultTo(0)
+      table.double('order_total').nullable()
       table.integer('id_merk_kendaraan')
         .unsigned()
         .references('id_merk_kendaraan')

@@ -13,7 +13,9 @@ class RoomChatController {
         const room = await Room
             .query()
             .where('uuid', params.id)
-            .with('messages')
+            .with('messages', builder => {
+                return builder.orderBy('created_at', 'desc')
+            })
             .with('owner')
             .with('user')
             .first()
@@ -73,7 +75,9 @@ class RoomChatController {
         const listroom = await Room
             .query()
             .where('id_user', authData.id_user)
-            .with('messages')
+            .with('messages', builder => {
+                return builder.orderBy('created_at', 'desc').limit(2)
+            })
             .with('owner')
             .fetch()
         return response.ok(listroom)
@@ -84,7 +88,9 @@ class RoomChatController {
         const listroom = await Room
             .query()
             .where('id_owner', authData.id_owner)
-            .with('messages')
+            .with('messages', builder => {
+                return builder.orderBy('created_at', 'desc')
+            })
             .with('user')
             .fetch()
         return response.ok(listroom)

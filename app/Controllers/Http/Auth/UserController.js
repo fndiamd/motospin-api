@@ -85,11 +85,9 @@ class UserController {
     }
 
     async login({ auth, request, response }) {
+        const { user_telp, user_password } = request.post()
+
         try {
-
-            let user_telp = request.input('user_telp')
-            let user_password = request.input('user_password')
-
             const thisUser = await User.findBy('user_telp', user_telp)
             await auth.authenticator('user').revokeTokensForUser(thisUser)
 
@@ -100,18 +98,18 @@ class UserController {
                 "access_token": authentication
             })
         } catch (error) {
-            if (error.name === 'PasswordMisMatchException') {
-                return response.status(401).send({ message: 'Password salah! Cek kembali password anda' })
+            switch(error.code){
+                case 'E_USER_NOT_FOUND':
+                    return response.status(404).send({
+                        message: 'Nomor telepon tidak terdaftar'
+                    })
+                    break;
+                case 'E_PASSWORD_MISMATCH':
+                    return response.status(401).send({
+                        message: 'Password yang anda masukan salah!'
+                    })
+                    break;
             }
-
-            if (error.name === 'ModelNotFoundException') {
-                return response.status(404).send({ message: 'User tidak terdaftar!' })
-            }
-            return response.status(error.status).send({
-                status: error.status,
-                error: error.name,
-                message: error.message
-            })
         }
     }
 

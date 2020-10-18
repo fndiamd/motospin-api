@@ -14,6 +14,7 @@ class MidtransController {
             switch(requestData.status_code){
                 case "200":
                     Event.fire('settlement::paymentProduk', requestData)
+                    Event.fire('notifOutlet::orderProduk', requestData)
                     break;
                 case "201":
                     Event.fire('pending::paymentProduk', requestData)

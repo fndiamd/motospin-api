@@ -28,7 +28,7 @@ class CartController {
                 .where({ id_user: authData.id_user }).fetch()
 
             const group = await this.groupItemBy(result.toJSON(), 'produk.id_mitra');
-            return response.json(group)
+            return response.ok(group)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -56,7 +56,7 @@ class CartController {
                 id_keranjang_produk = storeData.id_keranjang_produk
             }
             const thisData = await Cart.query().with('produk').where('id_keranjang_produk', id_keranjang_produk).first()
-            return response.json(thisData)
+            return response.ok(thisData)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -65,37 +65,56 @@ class CartController {
         }
     }
 
-    async update({ params, response, request }) {
+    async update({ auth, params, response, request }) {
         try {
-            const thisData = await Cart.findOrFail(params.id)
+            const authData = await auth.authenticator('user').getUser()
+            const thisData = await Cart.findByOrFail({ 'id_user': authData.id_user, 'id_keranjang_produk': params.id })
+
             thisData.jumlah = request.input('jumlah')
             await thisData.save()
             const result = await Cart.query().with('produk').where('id_keranjang_produk', params.id).first()
-            return response.json(result)
+            
+            return response.ok(result)
         } catch (error) {
-            if (error.name === 'ModelNotFoundException') {
-                return response.status(404).send({ message: 'Data tidak ditemukan' })
+            switch (error.code) {
+                case 'E_MISSING_DATABASE_ROW':
+                    return response.status(error.status).send({
+                        status: error.status,
+                        message: 'Data tidak ditemukan'
+                    })
+                    break;
+                default:
+                    return response.status(error.status).send({
+                        error: error.name,
+                        message: error.message
+                    })
+                    break;
             }
-            return response.status(error.status).send({
-                error: error.name,
-                message: error.message
-            })
         }
     }
 
-    async delete({ params, response }) {
+    async delete({ auth, params, response }) {
         try {
-            const thisData = await Cart.findOrFail(params.id)
+            const authData = await auth.authenticator('user').getUser()
+            const thisData = await Cart.findByOrFail({ 'id_user': authData.id_user, 'id_keranjang_produk': params.id })
             await thisData.delete()
-            return response.json({ message: 'Produk berhasil dihapus dari keranjang' })
+            
+            return response.ok({ message: 'Produk berhasil dihapus dari keranjang' })
         } catch (error) {
-            if (error.name === 'ModelNotFoundException') {
-                return response.status(404).send({ message: 'Data tidak ditemukan' })
+            switch (error.code) {
+                case 'E_MISSING_DATABASE_ROW':
+                    return response.status(error.status).send({
+                        status: error.status,
+                        message: 'Data tidak ditemukan'
+                    })
+                    break;
+                default:
+                    return response.status(error.status).send({
+                        error: error.name,
+                        message: error.message
+                    })
+                    break;
             }
-            return response.status(error.status).send({
-                error: error.name,
-                message: error.message
-            })
         }
     }
 

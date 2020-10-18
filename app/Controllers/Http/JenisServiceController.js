@@ -9,7 +9,8 @@ class JenisServiceController {
     async index({ response }) {
         try {
             const result = await JenisService.query().with('tipeService').fetch()
-            return response.json(result)
+
+            return response.ok(result)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -18,10 +19,11 @@ class JenisServiceController {
         }
     }
 
-    async view({ response, params }) {
+    async view({ params, response }) {
         try {
             const thisData = await JenisService.findOrFail(params.id)
-            return response.json(thisData)
+
+            return response.ok(thisData)
         } catch (error) {
             if (error.name === 'ModelNotFoundException') {
                 return response.status(404).send({
@@ -35,7 +37,7 @@ class JenisServiceController {
         }
     }
 
-    async store({ request, response }) {
+    async store({ response, request }) {
         try {
             const logoFile = request.file('logo_file', {
                 types: ['png'],
@@ -65,7 +67,7 @@ class JenisServiceController {
             }
 
             const exec = await JenisService.create(data)
-            return exec
+            return response.created(exec)
 
         } catch (error) {
             return response.status(error.status).send({
@@ -75,7 +77,7 @@ class JenisServiceController {
         }
     }
 
-    async update({ request, response, params }) {
+    async update({ params, response, request }) {
         try {
             const logoFile = request.file('logo_file', {
                 types: ['png'],
@@ -90,8 +92,8 @@ class JenisServiceController {
             }
 
             const thisData = await JenisService.findOrFail(params.id)
-            const checkExists = await JenisService.findBy('jenis_service', data.jenis_service)
-            if (checkExists && thisData.jenis_service != data.jenis_service) {
+            const checkExists = await JenisService.findBy('jenis_service', dataUpdate.jenis_service)
+            if (checkExists && thisData.jenis_service != dataUpdate.jenis_service) {
                 return response.status(400).send({ message: 'Jenis Service sudah ada!' })
             }
 
@@ -112,43 +114,54 @@ class JenisServiceController {
             thisData.id_jenis_mitra = dataUpdate.id_jenis_mitra
 
             await thisData.save()
-            return response.json(thisData)
 
+            return response.ok(thisData)
         } catch (error) {
-            if (error.name === 'ModelNotFoundException') {
-                return response.status(404).send({
-                    message: 'Data tidak ditemukan'
-                })
+            switch (error.code) {
+                case 'E_MISSING_DATABASE_ROW':
+                    return response.status(error.status).send({
+                        status: error.status,
+                        message: 'Data tidak ditemukan'
+                    })
+                    break;
+                default:
+                    return response.status(error.status).send({
+                        error: error.name,
+                        message: error.message
+                    })
+                    break;
             }
-            return response.status(error.status).send({
-                error: error.name,
-                message: error.message
-            })
         }
     }
 
-    async delete({ response, params }){
+    async delete({ params, response }) {
         try {
             const thisData = await JenisService.findOrFail(params.id)
             thisData.delete()
-            return response.json({ message: 'Data berhasil dihapus' })
+
+            return response.ok({ message: 'Data berhasil dihapus' })
         } catch (error) {
-            if (error.name === 'ModelNotFoundException') {
-                return response.status(404).send({
-                    message: 'Data tidak ditemukan'
-                })
+            switch (error.code) {
+                case 'E_MISSING_DATABASE_ROW':
+                    return response.status(error.status).send({
+                        status: error.status,
+                        message: 'Data tidak ditemukan'
+                    })
+                    break;
+                default:
+                    return response.status(error.status).send({
+                        error: error.name,
+                        message: error.message
+                    })
+                    break;
             }
-            return response.status(error.status).send({
-                error: error.name,
-                message: error.message
-            })
         }
     }
 
-    async serviceMitra({ request, response }){
+    async serviceMitra({ response, request }) {
         try {
-            const result = await JenisService.query().with('tipeService').where({ id_jenis_mitra : request.input('id_jenis_mitra')}).fetch()
-            return response.json(result)
+            const result = await JenisService.query().with('tipeService').where({ id_jenis_mitra: request.input('id_jenis_mitra') }).fetch()
+            return response.ok(result)
         } catch (error) {
             return response.status(error.status).send({
                 error: error.name,
@@ -157,7 +170,7 @@ class JenisServiceController {
         }
     }
 
-    async image_path({ response, params }) {
+    async image_path({ params, response }) {
         return response.download(Helpers.publicPath(`uploads/jenis-service/${params.file}`))
     }
 

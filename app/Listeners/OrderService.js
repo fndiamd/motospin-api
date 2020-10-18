@@ -2,13 +2,14 @@
 
 const Firebase = use('Adonis/Services/Firebase')
 const Token = use('App/Models/FirebaseTokenUser')
+const TokenOwner = use('App/Models/FirebaseTokenOwner')
 const Outlet = use('App/Models/MitraOutlet')
 const Dompet = use('App/Models/DompetOwner')
 const HistoriDompet = use('App/Models/HistoriDompetOwner')
 
-const Notification = exports = module.exports = {}
+const OrderService = exports = module.exports = {}
 
-Notification.createdOrderService = async (order) => {
+OrderService.createdOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
@@ -45,7 +46,46 @@ Notification.createdOrderService = async (order) => {
     }
 }
 
-Notification.acceptOrderService = async (order) => {
+OrderService.incomingOrderService = async (order) => {
+    const outlet = await Outlet.findOrFail(order.id_mitra)
+
+    const getToken = await TokenOwner.query().where({ id_owner: outlet.id_owner }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    const message = {
+        notification: {
+            title: 'Pesanan service baru',
+            body: `Ada pesanan service baru nih dengan invoice ${order.order_kode} segera dikonfirmasi yaa!`
+        },
+        data: {
+            notification_type: 'order-service',
+            id_order_service: `${order.id_order_service}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: 'Pesanan service baru',
+                body: `Ada pesanan service baru nih dengan invoice ${order.order_kode} segera dikonfirmasi yaa!`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
+    } catch (error) {
+        return error.message
+    }
+}
+
+OrderService.acceptOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
@@ -82,7 +122,44 @@ Notification.acceptOrderService = async (order) => {
     }
 }
 
-Notification.declineOrderService = async (order) => {
+OrderService.workingOrderService = async (order) => {
+    const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    const message = {
+        notification: {
+            title: 'Service mulai dikerjakan',
+            body: `Service anda mulai dikerjakan, silahkan tunggu dengan sabar`
+        },
+        data: {
+            notification_type: 'order-service',
+            id_order_service: `${order.id_order_service}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: 'Service mulai dikerjakan',
+                body: `Service anda mulai dikerjakan, silahkan tunggu dengan sabar`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
+    } catch (error) {
+        return error.message
+    }
+}
+
+OrderService.declineOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
@@ -119,7 +196,44 @@ Notification.declineOrderService = async (order) => {
     }
 }
 
-Notification.finishOrderService = async (order) => {
+OrderService.cancelOrderService = async (order) => {
+    const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
+    const registrationToken = []
+
+    getToken.toJSON().map(e => {
+        registrationToken.push(e.registration_token)
+    })
+
+    const message = {
+        notification: {
+            title: 'Pesanan anda dibatalkan',
+            body: `Pesanan dengan invoice ${order.order_kode} dibatalkan oleh ${order.toJSON().outlet.mitra_nama}`
+        },
+        data: {
+            notification_type: 'order-service',
+            id_order_service: `${order.id_order_service}`
+        },
+        android: {
+            priority: 'high',
+            notification: {
+                title: 'Pesanan diterima bengkel',
+                body: `Pesanan dengan invoice ${order.order_kode} diterima bengkel ${order.toJSON().outlet.mitra_nama}`,
+                sound: 'default',
+                priority: 'high',
+                channelId: '500'
+            }
+        },
+        tokens: registrationToken
+    }
+
+    try {
+        Firebase.messaging().sendMulticast(message)
+    } catch (error) {
+        return error.message
+    }
+}
+
+OrderService.finishOrderService = async (order) => {
     const getToken = await Token.query().where({ id_user: order.id_user }).fetch()
     const registrationToken = []
 
